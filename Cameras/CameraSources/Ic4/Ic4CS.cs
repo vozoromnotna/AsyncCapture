@@ -1,0 +1,176 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Windows.Media.Imaging;
+using System.Windows.Threading;
+using System.Threading;
+using ic4;
+using DirectShowLib;
+using OpenCvSharp.Internal.Vectors;
+using AsyncCapture.Cameras.CameraProperties.Ic4Properties;
+
+namespace AsyncCapture.Cameras.CameraSources.Ic4;
+
+
+public sealed class Ic4CS : CameraSource
+{
+    Dispatcher _initDispatcher = Dispatcher.CurrentDispatcher;
+
+    Grabber _grabber;
+    public Ic4CS()
+    {
+        Library.Init(LogLevel.Trace);
+
+        var deviceList = DeviceEnum.Devices;
+
+        if (deviceList.Count == 0)
+        {
+            throw new Exception("IC устройства не найдены");
+        }
+
+        _grabber = new Grabber();
+        _grabber.DeviceOpen(deviceList[0]);
+
+        initProperties();
+
+        initSink();
+
+        //_trigger.Execute();
+    }
+
+    void initProperties()
+    {
+        initExposureProp();
+        initTrigger();
+        //initImageSizeProp();
+    }
+
+    void initTrigger()
+    {
+        var triggerS = _grabber.DevicePropertyMap.Find(PropId.TriggerSource);
+        var triggerM = _grabber.DevicePropertyMap.Find(PropId.TriggerMode);
+
+        triggerM.Value = "Off";
+        triggerS.Value = "Any";
+
+        _trigger = _grabber.DevicePropertyMap.Find(PropId.TriggerSoftware);
+    }
+
+    void initImageSizeProp()
+    {
+        var widthProp = _grabber.DevicePropertyMap.Find(PropId.Width);
+        var heightProp = _grabber.DevicePropertyMap.Find(PropId.Height);
+
+        PropInteger binningHProp = null;
+        PropInteger binningVProp = null;
+        var bH = _grabber.DevicePropertyMap.TryFind(PropId.BinningHorizontal, out binningHProp);
+        var bV = _grabber.DevicePropertyMap.TryFind(PropId.BinningVertical, out binningVProp);
+
+        var imageSizeController = new Ic4ImageSizeController(widthProp, heightProp, binningHProp, binningVProp);
+
+        Properties.Add(new Ic4HeightProp(imageSizeController));
+        Properties.Add(new Ic4WidthProp(imageSizeController));
+
+        if (bH) Properties.Add(new Ic4BinningHorizontalProp(imageSizeController));
+        if (bV) Properties.Add(new Ic4BinningVerticalProp(imageSizeController));
+
+        imageSizeController.PropertyChanged += (sender, e) =>
+        {
+            restartSink();
+        };
+    }
+
+    void initExposureProp()
+    {
+        var expProp = _grabber.DevicePropertyMap.Find(PropId.ExposureTime);
+        var autoExpProp = _grabber.DevicePropertyMap.Find(PropId.ExposureAuto);
+        Ic4ExposureController exposureController = new(autoExpProp, expProp);
+
+        Properties.Add(new Ic4ExposureAutoProp(exposureController));
+        Properties.Add(new Ic4ExposureTimeProp(exposureController));
+
+
+        var fpsProp = _grabber.DevicePropertyMap.Find(PropId.AcquisitionFrameRate);
+
+        fpsProp.Value = fpsProp.Maximum;
+
+    }
+
+    async void disposeSink()
+    {
+        //(_grabber.Sink as QueueSink).FramesQueued -= Sink_FramesQueued;
+        //_grabber.Sink.Dispose();
+        try
+        {
+            await _initDispatcher.InvokeAsync(_grabber.StreamStop);
+        }
+        catch
+        {
+
+        }
+
+    }
+
+    PropCommand _trigger;
+    void initSink()
+    {
+        var sink = new QueueSink();
+        sink.FramesQueued += Sink_FramesQueued;
+        _grabber.StreamSetup(sink, StreamSetupOption.AcquisitionStart);
+
+    }
+
+    void restartSink()
+    {
+        disposeSink();
+        initSink();
+    }
+
+    bool _locker = false;
+    private async void Sink_FramesQueued(object sender, QueueSinkEventArgs e)
+    {
+
+        var sink = _grabber.Sink as QueueSink;
+        if (sink == null)
+            return;
+
+        var res = sink.TryPopOutputBuffer(out var buffer);
+        if (res)
+        {
+            var meta = new Dictionary<string, object>();
+            await imageGetted(buffer.CreateOpenCvWrap(), meta);
+        }
+            
+
+        //_trigger.Execute();
+
+    }
+
+    public override void Dispose()
+    {
+        disposeSink();
+        _grabber.Dispose();
+    }
+
+    public override void StartLive()
+    {
+        initSink();
+        _isLive = true;
+    }
+
+    public override void StopLive()
+    {
+        disposeSink();
+        _isLive = false;
+    }
+
+    public override string Name => "VIS";
+
+    private bool _isLive = true;
+    public override bool IsLive => _isLive;
+}
