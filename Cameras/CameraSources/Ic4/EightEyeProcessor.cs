@@ -97,7 +97,9 @@ public class EightEyeProcessor : ISink<Mat>
         var res = proccess(image);
         await Parallel.ForAsync(0, 8, async (i, token) =>
         {
-            await sinks[i].PutImage(res[i], meta);
+            var newMeta = new Dictionary<string, object>();
+            newMeta["index"] = i; 
+            await sinks[i].PutImage(res[i], newMeta);
         });
     }
 }

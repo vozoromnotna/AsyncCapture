@@ -24,12 +24,6 @@
     <PackageReference Include="System.IO.Ports" Version="8.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Cameras\CameraSources\Ic4\out.h5">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
   
   
 </Project>
