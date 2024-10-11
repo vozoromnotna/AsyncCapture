@@ -2,6 +2,7 @@
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +14,11 @@ public class CalibDataReader
 {
     public CalibData ReadData(string fileName)
     {
+        if (!Path.Exists(fileName))
+        {
+            throw new FileNotFoundException(fileName);
+        }
+
         var tree = Hdf5.ReadTreeFileStructure(fileName);
         var fileId = Hdf5.OpenFile(fileName);
         (_, var pos) = Hdf5.ReadDataset<int>(fileId, "/pos");// [8, 4]

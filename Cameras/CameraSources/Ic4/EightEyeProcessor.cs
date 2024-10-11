@@ -13,6 +13,10 @@ namespace AsyncCapture.Cameras.CameraSources.Ic4;
 
 public class EightEyeProcessor : ISink<Mat>
 {
+    public static int[] GetWavelengths()
+    {
+        return [700, 750, 800, 650, 600, 550, 500, 450];
+    }
     public EightEyeProcessor(CalibData calibData)
     {
         _calibData = calibData;
@@ -31,6 +35,8 @@ public class EightEyeProcessor : ISink<Mat>
     }
 
     public ISink<Mat>[] sinks = new ISink<Mat>[8];
+
+    int[] _wavelengths = GetWavelengths();
 
     private Mat[] proccess(Mat input)
     {
@@ -95,10 +101,12 @@ public class EightEyeProcessor : ISink<Mat>
     public async Task PutImage(Mat image, Dictionary<string, object> meta)
     {
         var res = proccess(image);
+
         await Parallel.ForAsync(0, 8, async (i, token) =>
         {
             var newMeta = new Dictionary<string, object>();
-            newMeta["index"] = i; 
+            newMeta["index"] = i;
+            newMeta["wavelength"] = _wavelengths[i];
             await sinks[i].PutImage(res[i], newMeta);
         });
     }
