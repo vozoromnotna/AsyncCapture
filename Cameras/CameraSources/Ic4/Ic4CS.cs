@@ -36,6 +36,8 @@ public sealed class Ic4CS : CameraSource
         _grabber = new Grabber();
         _grabber.DeviceOpen(deviceList[0]);
 
+        var fps = _grabber.DevicePropertyMap.Find(PropId.AcquisitionFrameRate);
+        fps.TrySetValue(30);
         initProperties();
 
         initSink();

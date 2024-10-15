@@ -18,13 +18,9 @@ namespace AsyncCapture.Cameras.CameraProperties.IrayProperties
             _portName = portName;
             _baudRate = baundRate;
             _serialPort = new SerialPort(_portName, _baudRate);
-            _serialPort.ReadTimeout = 300;
-            _serialPort.WriteTimeout = 300;
             _serialPort.Open();
         }
 
-        const string DefaultPort = "COM26";
-        const int DefaultBandRate = 115200;
 
         public int MaxZoomPosition = 2920;
         public int MinZoomPosition = 1087;
@@ -33,8 +29,8 @@ namespace AsyncCapture.Cameras.CameraProperties.IrayProperties
         public int MaxFocusPosition = 2776;
 
         SerialPort _serialPort;
-        string _portName = DefaultPort;
-        int _baudRate = DefaultBandRate;
+        string _portName;
+        int _baudRate;
 
         private byte[] createBuffer(byte[] data)
         {
@@ -53,86 +49,120 @@ namespace AsyncCapture.Cameras.CameraProperties.IrayProperties
             _serialPort.Write(buffer, 0, buffer.Length);
         }
 
-        object _serialLocker = new object();
-        public async Task<byte[]> sendMessage(byte[] buffer)
+        readonly int _serialTimeout = 25;
+        readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+        const int MaxTries = 3;
+        public async Task<byte[]> SendMessage(byte[] buffer)
         {
-            using (SemaphoreSlim semaphore = new SemaphoreSlim(0, 1))
+            int tries = 0;
+            await _semaphore.WaitAsync();
+            var result = new List<byte>();
+            while(true)
             {
-                byte[] readBuffer = null;
-                SerialDataReceivedEventHandler handler = (sender, e) =>
+                result.Clear();
+
+                _serialPort.Write(buffer, 0, buffer.Length);
+
+                await Task.Delay(_serialTimeout);
+
+                while (_serialPort.BytesToRead > 0)
                 {
-                    int bytes = _serialPort.BytesToRead;
-                    if (bytes > 0)
+                    var readRes = _serialPort.ReadByte();
+                    if (readRes > 0)
                     {
-                        readBuffer = new byte[bytes];
-                        _serialPort.Read(readBuffer, 0, bytes);
-                        semaphore.Release();
+                        result.Add((byte)readRes);
                     }
-                };
+                    else
+                    {
+                        break;
+                    }
 
-                try
-                {
-                    _serialPort.DataReceived += handler;
-                    writeBuffer(buffer);
-
-                    semaphore.Wait(1000);
-                }
-                finally
-                {
-                    _serialPort.DataReceived -= handler;
                 }
 
-                return readBuffer;
-            }
+                if (!IsCorrect(result) && tries < MaxTries)
+                {
+                    tries++;
+                    await Task.Delay(_serialTimeout);
+                }
+                else
+                {
+                    break;
+                }
+
+            } 
+
+            _semaphore.Release();
+            return result.ToArray();
         }
 
+        readonly HashSet<byte> ErrorCodes = [0xF1, 0xFB, 0xFD, 0xFF];
+        private bool IsCorrect(List<byte> response)
+        {
+            if (response.Count < 3)
+                return false;
+
+            if (response[0] != 0x55)
+                return false;
+
+            if (response[^1] != 0xAA)
+                return false;
+
+            if (response[^2] != 0xEB)
+                return false;
+
+            if (ErrorCodes.Contains(response[2]))
+                return false;
+
+            return true;
+
+        }
         public async void ZoomShort()
         {
-            await sendMessage(new byte[] { 0xAA, 0x06, 0x08, 0x31, 0x01, 0x01, 0x00, 0xEB, 0xEB, 0xAA });
+            await SendMessage(new byte[] { 0xAA, 0x06, 0x08, 0x31, 0x01, 0x01, 0x00, 0xEB, 0xEB, 0xAA });
         }
 
         public async void ZoomLong()
         {
-            await sendMessage(new byte[] { 0xAA, 0x06, 0x08, 0x31, 0x01, 0x02, 0x00, 0xEC, 0xEB, 0xAA });
+            await SendMessage(new byte[] { 0xAA, 0x06, 0x08, 0x31, 0x01, 0x02, 0x00, 0xEC, 0xEB, 0xAA });
 
         }
 
         public async void ZoomShutoff()
         {
-            await sendMessage(new byte[] { 0xAA, 0x05, 0x08, 0x32, 0x01, 0x00, 0xEA, 0xEB, 0xAA });
+            await SendMessage(new byte[] { 0xAA, 0x05, 0x08, 0x32, 0x01, 0x00, 0xEA, 0xEB, 0xAA });
         }
 
         public async void FocusFar()
         {
-            await sendMessage(new byte[] { 0xAA, 0x06, 0x08, 0x21, 0x01, 0x02, 0x00, 0xDC, 0xEB, 0xAA });
+            await SendMessage(new byte[] { 0xAA, 0x06, 0x08, 0x21, 0x01, 0x02, 0x00, 0xDC, 0xEB, 0xAA });
         }
 
         public async void FocusNear()
         {
-            await sendMessage(new byte[] { 0xAA, 0x06, 0x08, 0x21, 0x01, 0x01, 0x00, 0xDB, 0xEB, 0xAA });
+            await SendMessage(new byte[] { 0xAA, 0x06, 0x08, 0x21, 0x01, 0x01, 0x00, 0xDB, 0xEB, 0xAA });
         }
 
         public async void FocusShutoff()
         {
-            await sendMessage(new byte[] { 0xAA, 0x05, 0x08, 0x22, 0x01, 0x00, 0xDA, 0xEB, 0xAA });
+            await SendMessage(new byte[] { 0xAA, 0x05, 0x08, 0x22, 0x01, 0x00, 0xDA, 0xEB, 0xAA });
         }
 
         public async Task<int> GetFocusPosition()
         {
-            var res = await sendMessage(new byte[] { 0xAA, 0x05, 0x08, 0x23, 0x00, 0x00, 0xDA, 0xEB, 0xAA });
+            var res = await SendMessage(new byte[] { 0xAA, 0x05, 0x08, 0x23, 0x00, 0x00, 0xDA, 0xEB, 0xAA });
             return BitConverter.ToInt16(res, 5);
         }
 
         public async Task<int> GetZoomPosition()
         {
-            var res = await sendMessage(new byte[] { 0xAA, 0x05, 0x08, 0x33, 0x00, 0x00, 0xEA, 0xEB, 0xAA });
+            var res = await SendMessage(new byte[] { 0xAA, 0x05, 0x08, 0x33, 0x00, 0x00, 0xEA, 0xEB, 0xAA });
             return BitConverter.ToInt16(res, 5);
 
         }
 
         public async void AutoFocus()
         {
-            var res = await sendMessage(new byte[] { 0xAA, 0x05, 0x08, 0x2F, 0x01, 0x00, 0xE7, 0xEB, 0xAA });
+            var res = await SendMessage(new byte[] { 0xAA, 0x05, 0x08, 0x2F, 0x01, 0x00, 0xE7, 0xEB, 0xAA });
         }
 
         byte calculateCheckSum(byte[] bytes)

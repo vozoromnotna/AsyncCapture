@@ -58,6 +58,7 @@ public abstract class MatSaverSinkSourceBase : MatSource, ISinkSource<Mat>, ISav
             {
                 OnRecordStop();
                 MatsSaved?.Invoke(this, new MatSavedEventArgs { Name = _name, DirectoryPath = _recordDirectoryPath, IsSeries = true });
+                _recordDirectoryPath = "";
             }
             _isSave = value;
         }

@@ -23,8 +23,7 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
     protected bool _saveSingle = false;
 
     private int _counter = 0;
-    protected virtual int MaxCount { get => 4; }
-    public virtual async Task PutImage(Mat image, Dictionary<string, object> meta)
+    public override async Task PutImage(Mat image, Dictionary<string, object> meta)
     {
         if (!_isSave)
         {
@@ -34,11 +33,12 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
                 return;
             }
 
+
             await SaveImage(image, meta);
 
             _saveSingle = false;
 
-            base.RiseMatSaved(_name, _recordDirectoryPath, false);
+            base.RiseMatSaved(_name, _directoryPath, false);
 
             return;
 
@@ -52,8 +52,13 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
 
     protected override async Task SaveImage(Mat image, Dictionary<string, object> meta)
     {
+        string path = _recordDirectoryPath;
+
+        if (String.IsNullOrEmpty(path))
+            path = _directoryPath;
+
         var time = Helper.GetStringTime();
-        new ImageSaver(image.Clone(), camName: _name, path: _recordDirectoryPath, saveFormat: SaveFormat, time: time).SaveAsync();
+        new ImageSaver(image.Clone(), camName: _name, path: path, saveFormat: SaveFormat, time: time).SaveAsync();
     }
 
 

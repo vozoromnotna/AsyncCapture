@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Nito.AsyncEx;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -251,8 +252,8 @@ public class IrayPaletteProp : ListProperty
         };
 
         var bytes = new byte[] { 0xAA, 0x05, 0x01, 0x42, 0x00, 0x00, 0xF2, 0xEB, 0xAA };
-        var res = _comControl.sendMessage(bytes).Result;
 
+        var res = AsyncContext.Run(async () => await _comControl.SendMessage(bytes));
         try
         {
             var curPalette = res[4];
@@ -267,7 +268,7 @@ public class IrayPaletteProp : ListProperty
     protected override async void SelectedItemChanged()
     {
         var bytes = nameBytesPairs[values[SelectedIndex]];
-        var res = await _comControl.sendMessage(bytes);
+        var res = await _comControl.SendMessage(bytes);
         if (res[4] != 0x01)
             throw new Exception("ошибка в установке палитры");
     }
