@@ -16,6 +16,7 @@ using System.Security.Principal;
 using OpenCvSharp.Extensions;
 using static Tcam;
 using AsyncCapture.Cameras.CameraProperties;
+using OpenCvSharp;
 
 namespace AsyncCapture.Cameras.CameraSources.Toup;
 
@@ -30,8 +31,8 @@ public sealed class ToupCS : CameraSource
     }
 
 
-    private Tcam _nncam = null;
-    private Bitmap _bmpToFiter = null;
+    private Tcam _nncam;
+
     private bool _triggerMode = false;
 
     public override string Name => "SWIR";
@@ -43,25 +44,22 @@ public sealed class ToupCS : CameraSource
     private bool _isLive = true;
     public override bool IsLive => _isLive;
 
+    private int _width;
+    private int _height;
+
     private void startDevice(Tcam nncam)
     {
         if (nncam != null)
         {
             nncam.put_Option(eOPTION.OPTION_BITDEPTH, 0);
-            nncam.put_Option(eOPTION.OPTION_RGB, 2); // RGB32
-
+            var res = nncam.put_Option(eOPTION.OPTION_RGB, 0); // RGB24
             uint resnum = _nncam.ResolutionNumber;
             uint eSize = 0;
             if (_nncam.get_eSize(out eSize))
             {
-                int width = 0, height = 0;
-                if (nncam.get_Size(out width, out height))
-                {
-                    /* The backend of WPF/UWP/WinUI is Direct3D/Direct2D, which is different from Winform's backend GDI.
-                     * We use their respective native formats, Bgr32 in WPF/UWP/WinUI, and Bgr24 in Winform
-                     */
-                    _bmpToFiter = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 
+                if (nncam.get_Size(out _width, out _height))
+                {
                     if (!nncam.StartPullModeWithCallback(new DelegateEventCallback(DelegateOnEventCallback)))
                         throw new Exception("Failed to start camera");
                 }
@@ -121,31 +119,26 @@ public sealed class ToupCS : CameraSource
     private async void OnEventImageToFilter()
     {
 
-        if (_bmpToFiter != null)
+        try
         {
+            var mat = new Mat(new OpenCvSharp.Size(_width, _height), MatType.CV_8UC3);
             try
             {
-                BitmapData bmpdata = _bmpToFiter.LockBits(new System.Drawing.Rectangle(0, 0, _bmpToFiter.Width, _bmpToFiter.Height), ImageLockMode.WriteOnly, _bmpToFiter.PixelFormat);
-                try
-                {
-                    var bOK = _nncam.PullImageV3(bmpdata.Scan0, 0, 24, bmpdata.Stride, out var info); // check the return value
-                }
-                finally
-                {
-                    _bmpToFiter.UnlockBits(bmpdata);
-
-                    var meta = new Dictionary<string, object>();
-
-                    if (_isLive)
-                        await imageGetted(_bmpToFiter.ToMat(), meta);
-                }
+                var bOK = _nncam.PullImageV3(mat.Data, 0, 24, (int)mat.Step(), out var info); // check the return value
             }
-            catch (Exception ex)
+            finally
             {
-                MessageBox.Show(ex.ToString());
-            }
+                var meta = new Dictionary<string, object>();
 
+                if (_isLive)
+                    await imageGetted(mat, meta);
+            }
         }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.ToString());
+        }
+
 
     }
 

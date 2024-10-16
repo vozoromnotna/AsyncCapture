@@ -11,6 +11,9 @@ public class ScaleImageSinkSource : MatSource, ISinkSource<Mat>
 {
     private double _hScaleFactor;
     private double _wScaleFactor;
+
+    public double HeightScaleFactor { get => _hScaleFactor; }
+    public double WidthScaleFactor {  get => _wScaleFactor; }
     public ScaleImageSinkSource(double widthScaleFactor, double heightScaleFactor) 
     {
         _hScaleFactor = heightScaleFactor;
