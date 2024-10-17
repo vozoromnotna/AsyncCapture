@@ -105,10 +105,19 @@ public class EightEyeProcessor : ISink<Mat>
         await Parallel.ForAsync(0, 8, async (i, token) =>
         {
             var newMeta = new Dictionary<string, object>();
+            CopyDict(meta, newMeta);
             newMeta["index"] = i;
             newMeta["wavelength"] = _wavelengths[i];
             await sinks[i].PutImage(res[i], newMeta);
         });
+    }
+
+    private void CopyDict(Dictionary<string, object> oldDict, Dictionary<string, object> newDict)
+    {
+        foreach (var key in oldDict.Keys)
+        {
+            newDict[key] = oldDict[key];
+        }
     }
 }
 
