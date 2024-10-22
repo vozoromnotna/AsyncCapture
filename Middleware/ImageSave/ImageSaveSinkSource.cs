@@ -62,7 +62,7 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
     }
 
 
-    public void Single()
+    public virtual void Single()
     {
         System.IO.Directory.CreateDirectory(_directoryPath);
         _saveSingle = true;

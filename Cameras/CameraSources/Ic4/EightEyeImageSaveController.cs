@@ -25,10 +25,16 @@ public class EightEyeImageSaverSink : ImageSaveSinkSource
 
     protected override async Task SaveImage(Mat image, Dictionary<string, object> meta)
     {
-
+        _recordDirectoryPath = GetRecordDirectoryPath();
         var time = _saveController.GetTime();
+        new ImageSaver(image.Clone(), camName: _name, path: _recordDirectoryPath, saveFormat: SaveFormat, time: time).SaveAsync();
+    }
 
-        new ImageSaver(image.Clone(), camName: _name, path: _directoryPath, saveFormat: SaveFormat, time: time).SaveAsync();
+    public override void Single()
+    {
+        _directoryPath = $"{_saveController.GetDirectory()}\\{_name}";
+        System.IO.Directory.CreateDirectory(_directoryPath);
+        _saveSingle = true;
     }
 }
 public class EightEyeImageSaveController : ImageSaveSinkSource
@@ -37,7 +43,6 @@ public class EightEyeImageSaveController : ImageSaveSinkSource
     {
     }
     private readonly List<ImageSaveSinkSource> _savers = new();
-
 
     protected override void OnRecordStart()
     {
@@ -63,7 +68,7 @@ public class EightEyeImageSaveController : ImageSaveSinkSource
 
     public string GetDirectory()
     {
-        return _directoryPath;
+        return _recordDirectoryPath;
     }
 
     int _counter = 0;
@@ -92,12 +97,26 @@ public class EightEyeImageSaveController : ImageSaveSinkSource
         
     }
 
-    public void Single()
+    protected string GetSingleDirectoryPath()
+    {
+        var time = Helper.GetStringTime();
+
+        string directoryPath = $"{_directoryPath}\\IMG_{_name}_{time}\\";
+
+        return directoryPath;
+    }
+
+    public override void Single()
     {
         _counter = 0;
+        _saveSingle = true;
+        _recordDirectoryPath = GetSingleDirectoryPath();
         foreach(var saver in _savers)
         {
             saver.Single();
         }
+        _saveSingle = false;
+
+        RiseMatSaved("VIS", _recordDirectoryPath, false);
     }
 }

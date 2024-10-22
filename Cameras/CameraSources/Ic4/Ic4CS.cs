@@ -49,6 +49,7 @@ public sealed class Ic4CS : CameraSource
     {
         initExposureProp();
         initTrigger();
+        initGainProp();
         //initImageSizeProp();
     }
 
@@ -101,6 +102,19 @@ public sealed class Ic4CS : CameraSource
 
         fpsProp.Value = fpsProp.Maximum;
 
+    }
+
+    void initGainProp()
+    {
+        var gainAuto = (PropEnumeration)_grabber.DevicePropertyMap.Find("GainAuto");
+        var gain = (PropFloat)_grabber.DevicePropertyMap.Find("Gain");
+
+        gainAuto.Value = "Off";
+        
+        Ic4GainController gainController = new(gainAuto, gain);
+
+        Properties.Add(new Ic4GainAutoProp(gainController));
+        Properties.Add(new Ic4GainProp(gainController));
     }
 
     async void disposeSink()
