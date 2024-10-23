@@ -32,12 +32,13 @@ namespace AsyncCapture.Cameras.CameraProperties.IrayProperties
         string _portName;
         int _baudRate;
 
-        private byte[] createBuffer(byte[] data)
+        public byte[] CreateBuffer(byte[] data)
         {
             byte[] head = { 0xAA, (byte)(data.Length + 1) };
             byte[] end = { 0xEB, 0xAA };
-            byte[] checkSum = { calculateCheckSum(data) };
-            return head.Concat(data).Concat(checkSum).Concat(end).ToArray();
+            var toCheck = head.Concat(data).ToArray();
+            byte[] checkSum = { calculateCheckSum(toCheck) };
+            return toCheck.Concat(checkSum).Concat(end).ToArray();
         }
 
         private void writeBuffer(byte[] buffer)
