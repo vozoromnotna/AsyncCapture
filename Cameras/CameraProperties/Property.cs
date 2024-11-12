@@ -52,6 +52,8 @@ public abstract class Property<T> : PropertyBase
     public T MinValue { get { return _minValue; } }
     public T MaxValue { get { return _maxValue; } }
 
+    protected bool _isLogarithmic;
+    public bool IsLogarithmic { get => _isLogarithmic; }
 
     protected T _value;
     public T Value
