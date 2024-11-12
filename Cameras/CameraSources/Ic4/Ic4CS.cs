@@ -36,14 +36,23 @@ public sealed class Ic4CS : CameraSource
         _grabber = new Grabber();
         _grabber.DeviceOpen(deviceList[0]);
 
+
         var fps = _grabber.DevicePropertyMap.Find(PropId.AcquisitionFrameRate);
         fps.TrySetValue(30);
+
+        var maxWidthProp = _grabber.DevicePropertyMap.Find(PropId.WidthMax);
+
+        ImageMaxWidth = (int)maxWidthProp.Value;
         initProperties();
 
         initSink();
 
         //_trigger.Execute();
     }
+
+    public Grabber Grabber { get => _grabber; }
+
+    public int ImageMaxWidth { get; private set; }
 
     void initProperties()
     {
