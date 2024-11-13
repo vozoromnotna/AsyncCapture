@@ -42,9 +42,16 @@ public class VideoCaptureCS : CameraSource
                 {
                     var meta = new Dictionary<string, object>();
                     await imageGetted(frame, meta);
+                    
                 }
+                else
+                {
+					break;
+				}
                     
             }
+
+            RiseEndOfStream();
         });
 
         _captureThread.Start();

@@ -17,7 +17,10 @@ namespace AsyncCapture
             }
         }
         List<ISink<Mat>> _sinks = new List<ISink<Mat>>();
-        public void SetSink(ISink<Mat> sink)
+
+		public event EventHandler EndOfStream;
+
+		public void SetSink(ISink<Mat> sink)
         {
             _sinks.Add(sink);
         }

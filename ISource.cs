@@ -9,6 +9,7 @@ namespace AsyncCapture
 {
     public interface ISource<T>
     {
+        public event EventHandler EndOfStream;
         void SetSink(ISink<T> sink);
 
         ISink<T> GetSink();
@@ -18,7 +19,14 @@ namespace AsyncCapture
     {
         protected ISink<T> _sink;
 
-        public ISink<T> GetSink()
+		public event EventHandler EndOfStream;
+
+        protected void RiseEndOfStream()
+        {
+            EndOfStream?.Invoke(this, EventArgs.Empty);
+        }
+
+		public ISink<T> GetSink()
         {
             return _sink;
         }
