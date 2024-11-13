@@ -1,4 +1,5 @@
 ﻿
+using OpenCvSharp.XImgProc;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,11 +13,45 @@ namespace AsyncCapture.Cameras.CameraProperties.IrayProperties
 {
     public class IrayCOMControl
     {
+        public static async Task<bool> TestPort(string portName)
+        {
+            try
+            {
+                var serialPort = new SerialPort(portName, _baudRate);
+                serialPort.Open();
 
-        public IrayCOMControl(string portName, int baundRate)
+                var buffer = new byte[] { 0xAA, 0x04, 0x01, 0x70, 0x00, 0x1F, 0xEB, 0xAA };
+                var resp = await SendMessage(buffer, serialPort);
+
+                serialPort.Close();
+                serialPort.Dispose();
+
+                if (resp == null)
+                    return false;
+
+                if (resp.Length < 3)
+                    return false;
+
+                if (resp[0] != 0x55)
+                    return false;
+
+                if (resp[^1] != 0xAA)
+                    return false;
+
+                if (resp[^2] != 0xEB)
+                    return false;
+
+                return true;
+                
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        public IrayCOMControl(string portName)
         {
             _portName = portName;
-            _baudRate = baundRate;
             _serialPort = new SerialPort(_portName, _baudRate);
             _serialPort.Open();
         }
@@ -30,7 +65,7 @@ namespace AsyncCapture.Cameras.CameraProperties.IrayProperties
 
         SerialPort _serialPort;
         string _portName;
-        int _baudRate;
+        const int _baudRate = 115200;
 
         public byte[] CreateBuffer(byte[] data)
         {
@@ -50,10 +85,15 @@ namespace AsyncCapture.Cameras.CameraProperties.IrayProperties
             _serialPort.Write(buffer, 0, buffer.Length);
         }
 
-        readonly int _serialTimeout = 25;
-        readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+        const int _serialTimeout = 25;
+        static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
         const int MaxTries = 3;
+
         public async Task<byte[]> SendMessage(byte[] buffer)
+        {
+            return await SendMessage(buffer, _serialPort);
+        }
+        public static async Task<byte[]> SendMessage(byte[] buffer, SerialPort serialPort)
         {
             int tries = 0;
             await _semaphore.WaitAsync();
@@ -62,13 +102,13 @@ namespace AsyncCapture.Cameras.CameraProperties.IrayProperties
             {
                 result.Clear();
 
-                _serialPort.Write(buffer, 0, buffer.Length);
+                serialPort.Write(buffer, 0, buffer.Length);
 
                 await Task.Delay(_serialTimeout);
 
-                while (_serialPort.BytesToRead > 0)
+                while (serialPort.BytesToRead > 0)
                 {
-                    var readRes = _serialPort.ReadByte();
+                    var readRes = serialPort.ReadByte();
                     if (readRes > 0)
                     {
                         result.Add((byte)readRes);
@@ -96,8 +136,8 @@ namespace AsyncCapture.Cameras.CameraProperties.IrayProperties
             return result.ToArray();
         }
 
-        readonly HashSet<byte> ErrorCodes = [0xF1, 0xFB, 0xFD, 0xFF];
-        private bool IsCorrect(List<byte> response)
+        readonly static HashSet<byte> ErrorCodes = [0xF1, 0xFB, 0xFD, 0xFF];
+        private static bool IsCorrect(List<byte> response)
         {
             if (response.Count < 3)
                 return false;

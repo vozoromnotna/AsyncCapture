@@ -49,30 +49,38 @@ public sealed class ToupAutoExp : BoolProperty
     }
 }
 
-public sealed class ToupExp : uIntProperty
+public sealed class ToupExp : DoubleProperty
 {
     private Tcam nncam;
     public override string Name => "Exposure";
 
-    public override uint MinIncrement => 1;
+    public override double MinIncrement => 1;
 
     public override string DisplayName => "Экспозиция, мкс";
+
+    public override string FormatString => "0";
 
     public ToupExp(Tcam cam)
     {
         nncam = cam;
         uint nDef = 0;
-        nncam?.get_ExpTimeRange(out _minValue, out _maxValue, out nDef);
-        nncam?.get_ExpoTime(out _value);
+        uint min = 0;
+        uint max = 0;
+        uint value = 0;
+        nncam?.get_ExpTimeRange(out min, out max, out nDef);
+        nncam?.get_ExpoTime(out value);
+
+        _minValue = (double)min;
+        _maxValue = (double)max;
+        _value = (double)value;
+
+        _isLogarithmic = true;
     }
-    public override uint GetValue()
+
+
+    public override void SetValue(double val)
     {
-        nncam.get_ExpoTime(out uint curValue);
-        return curValue;
-    }
-    public override void SetValue(uint val)
-    {
-        nncam?.put_ExpoTime(val);
+        nncam?.put_ExpoTime((uint)val);
     }
 
 }

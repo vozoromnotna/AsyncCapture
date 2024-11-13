@@ -18,7 +18,7 @@ public class Ic4ExposureController : INotifyPropertyChanged
     {
         _autoExpProp = autoExpProp;
         _expTimeProp = expTimeProp;
-
+        
     }
 
     public bool IsAuto
@@ -59,6 +59,7 @@ public class Ic4ExposureTimeProp : DoubleProperty
 
     public override string Name => "Exposure_Time";
 
+    public override string FormatString => "0";
     public override string DisplayName => "Экспозиция, мкс";
 
     private readonly Ic4ExposureController _exposureController;
@@ -66,6 +67,7 @@ public class Ic4ExposureTimeProp : DoubleProperty
     private CancellationTokenSource _exposureUpdateCts;
     public Ic4ExposureTimeProp(Ic4ExposureController exposureController)
     {
+        _isLogarithmic = true;
         _exposureController = exposureController;
         _exposureController.PropertyChanged += (e, sender) => 
         { 

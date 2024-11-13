@@ -64,8 +64,8 @@ public sealed class ToupCS : CameraSource
                         throw new Exception("Failed to start camera");
                 }
             }
-            nncam.put_VFlip(true);
-            nncam.put_HFlip(false);
+            nncam.put_VFlip(false);
+            nncam.put_HFlip(true);
 
             nncam.get_RawFormat(out uint nFourCC, out uint bitdepth);
         }
