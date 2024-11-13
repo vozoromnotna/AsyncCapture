@@ -18,8 +18,6 @@ public class VideoCaptureCS : CameraSource
     {
         _name = name;
         _videoCapture = videoCapture;
-
-        startLive();
     }
 
     protected void stopLive()
@@ -73,6 +71,9 @@ public class VideoCaptureCS : CameraSource
     public override void StartLive()
     {
         _isLive = true;
+
+        if (_captureThread == null)
+            startLive();
     }
 
     public override void StopLive()
