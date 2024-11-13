@@ -45,8 +45,6 @@ public sealed class Ic4CS : CameraSource
         ImageMaxWidth = (int)maxWidthProp.Value;
         initProperties();
 
-        initSink();
-
         //_trigger.Execute();
     }
 
@@ -196,6 +194,6 @@ public sealed class Ic4CS : CameraSource
 
     public override string Name => "VIS";
 
-    private bool _isLive = true;
+    private bool _isLive;
     public override bool IsLive => _isLive;
 }

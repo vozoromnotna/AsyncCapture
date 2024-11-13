@@ -85,7 +85,13 @@ public abstract class MatSaverSinkSourceBase : MatSource, ISinkSource<Mat>, ISav
     abstract protected Task SaveImage(Mat image, Dictionary<string, object> meta);
 
     private int _counter = 0;
-    protected virtual int MaxCount { get => 4; }
+
+    protected int _maxCount = 4;
+    public int MaxCount
+    {
+        get => _maxCount;
+        set => _maxCount = value;
+    }
     public virtual async Task PutImage(Mat image, Dictionary<string, object> meta)
     {
         if (!_isSave)
@@ -96,7 +102,7 @@ public abstract class MatSaverSinkSourceBase : MatSource, ISinkSource<Mat>, ISav
 
         await SaveImage(image, meta);
 
-        if (_counter == MaxCount)
+        if (_counter >= MaxCount)
         {
             _counter = 0;
             await imageGetted(image, meta);

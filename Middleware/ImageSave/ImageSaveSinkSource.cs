@@ -72,7 +72,7 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
     {
         var time = Helper.GetStringTime();
 
-        string directoryPath = $"{_directoryPath}SER_{_name}_{time}\\";
+        string directoryPath = $"{_directoryPath}\\SER_{_name}_{time}\\";
 
         return directoryPath;
     }

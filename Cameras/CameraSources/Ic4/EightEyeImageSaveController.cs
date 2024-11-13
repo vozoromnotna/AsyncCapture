@@ -83,7 +83,7 @@ public class EightEyeImageSaveController : ImageSaveSinkSource
                 _saveTime = Helper.GetStringTime();
                 _counter++;
             }
-            else if (_counter < _savers.Count)
+            else if (_counter < _savers.Count - 1)
             {
                 _counter++;
             }
