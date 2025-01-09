@@ -87,6 +87,60 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
                 }
             }
             return processedData.ToArray();
-        } 
+        }
+
+        public async Task SendCommand(byte instruction, byte[] data = null)
+        {
+            var req = CreateRequest(instruction, data);
+            await SendRequest(req);
+        }
+
+        public async Task<byte[]> GetResponse(byte instruction, byte[] data = null)
+        {
+            var req = CreateRequest(instruction, data);
+            var resp = await ReciveResponce(req);
+            return resp;
+        }
+
+        public async Task FocusNear()
+        {
+            await SendCommand(0x01, [0x00]);
+        }
+
+        public async Task FocusFar()
+        {
+            await SendCommand(0x01, [0x0F]);
+        }
+
+        public async Task ZoomBig()
+        {
+            await SendCommand(0x11, [0x00]);
+        }
+
+        public async Task ZoomSmall()
+        {
+            await SendCommand(0x11, [0x0F]);
+        }
+
+        public async Task AutoFocus()
+        {
+            await SendCommand(0x34);
+        }
+
+        public async Task SetGain(byte gain)
+        {
+            await SendCommand(0x09, [gain]);
+        }
+
+        public async Task SetBrightness(byte brightness)
+        {
+            await SendCommand(0x0A, [brightness]);
+        }
+
+        public async Task<byte[]> GetStatus()
+        {
+            return await GetResponse(0x00);
+        }
+
     }
 }

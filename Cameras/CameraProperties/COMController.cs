@@ -37,9 +37,9 @@ namespace AsyncCapture.Cameras.CameraProperties
 
         public async Task<byte[]> ReciveResponce(byte[] request)
         {
-            return await ReciveMessage(_serialPort, request);
+            return await ReciveResponce(_serialPort, request);
         }
-        public async Task<byte[]> ReciveMessage(SerialPort serialPort, byte[] message)
+        public async Task<byte[]> ReciveResponce(SerialPort serialPort, byte[] message)
         {
             int tries = 0;
             await _semaphore.WaitAsync();
