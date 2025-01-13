@@ -9,7 +9,7 @@ using System.Xaml;
 
 namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
 {
-    internal class UTC12LComController : COMControllerBase
+    public class UTC12LComController : COMControllerBase
     {
         private const byte DeviceAddress = 0x26;
         private const byte StartByte = 0xF0;
@@ -17,33 +17,35 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
         public UTC12LComController(string comPortName) : base(comPortName)
         {
         }
-
-        protected override byte[] GetTestRequest()
+        public override byte[] GetTestRequest()
         {
-            return new byte[]
-            {
-                0xF0,
-                0x02,
-                0x26,
-                0x00,
-                0x26,
-                0xFF
-            };
+            return CreateRequest(0x00);
         }
 
         protected override bool IsCorrect(byte[]? bytes)
         {
-            throw new NotImplementedException();
+            if (bytes.Length < 3) 
+                return false;
+
+            if (bytes[0] != 0xF0)
+                return false;
+
+            if (bytes[^1] != 0xFF)
+                return false;
+
+            return true;
         }
 
         protected override SerialPort OpenSerialPort(string comPortName)
         {
-            return new SerialPort(comPortName, 115200);
+            var sp = new SerialPort(comPortName, 115200);
+            sp.Open();
+            return sp;
         }
 
         private byte[] CreateRequest(byte instruction, byte[] data = null)
         {
-            List<byte> requestData = [instruction, DeviceAddress];
+            List<byte> requestData = [DeviceAddress, instruction];
 
             if (data != null)
             {
@@ -84,6 +86,9 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
                         processedData.Add(0xF5);
                         processedData.Add(0x05);
                         break;
+                    default:
+                        processedData.Add(b);
+                        break;
                 }
             }
             return processedData.ToArray();
@@ -114,7 +119,7 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
 
         public async Task ZoomBig()
         {
-            await SendCommand(0x11, [0x00]);
+           await SendCommand(0x11, [0x00]);
         }
 
         public async Task ZoomSmall()
@@ -142,5 +147,28 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
             return await GetResponse(0x00);
         }
 
+        public async Task ImageEnhancment(bool status)
+        {
+            byte[] data = [(byte)(status ? 0x0F : 0x00)]; 
+            await SendCommand(0x01, data);
+        }
+
+        public async Task TimeDomainFilter(bool status)
+        {
+            byte[] data = [(byte)(status ? 0x0F : 0x00)];
+            await SendCommand(0x0D, data);
+        }
+
+        public async Task WhiteHot(bool status)
+        {
+            byte[] data = [(byte)(status ? 0x0F : 0x00)];
+            await SendCommand(0x05, data);
+        }
+
+        public async Task AutoCalibration(bool status)
+        {
+            byte[] data = [(byte)(status ? 0x0F : 0x00)];
+            await SendCommand(0x07, data);
+        }
     }
 }

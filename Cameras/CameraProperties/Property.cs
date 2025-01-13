@@ -56,19 +56,27 @@ public abstract class Property<T> : PropertyBase
     public bool IsLogarithmic { get => _isLogarithmic; }
 
     protected T _value;
+
+    private bool _suppressNotifications = false;
     public T Value
     {
         get
         {
-
             var ret_value = GetValue();
             return ret_value;
         }
         set
         {
-            if (IsEnabled == false) return;
+            if (IsEnabled == false || EqualityComparer<T>.Default.Equals(_value, value)) 
+                return;
+
+            if (_suppressNotifications)
+                return;
+
+            _suppressNotifications = true;
             this._value = value;
             SetValue(value);
+            _suppressNotifications = false;
             OnPropertyChanged();
         }
     }
@@ -97,6 +105,8 @@ public abstract class Property<T> : PropertyBase
 
     public override void Update()
     {
+        if (_suppressNotifications)
+            return;
         var oldEnabled = IsEnabled;
        // IsEnabled = true;
         _value = GetValue();

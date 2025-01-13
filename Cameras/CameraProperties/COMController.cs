@@ -18,11 +18,11 @@ namespace AsyncCapture.Cameras.CameraProperties
 
         public COMControllerBase(string comPortName)
         {
-            OpenSerialPort(comPortName);
+           _serialPort = OpenSerialPort(comPortName);
         }
 
         protected abstract SerialPort OpenSerialPort(string comPortName);
-        protected abstract byte[] GetTestRequest();
+        public abstract byte[] GetTestRequest();
         public virtual async Task<bool> TestPort()
         {
             var request = GetTestRequest();
@@ -54,7 +54,7 @@ namespace AsyncCapture.Cameras.CameraProperties
                 while (serialPort.BytesToRead > 0)
                 {
                     var readRes = serialPort.ReadByte();
-                    if (readRes > 0)
+                    if (readRes > -1)
                     {
                         result.Add((byte)readRes);
                     }
