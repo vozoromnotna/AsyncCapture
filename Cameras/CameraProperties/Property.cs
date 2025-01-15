@@ -57,7 +57,7 @@ public abstract class Property<T> : PropertyBase
 
     protected T _value;
 
-    private bool _suppressNotifications = false;
+    protected bool _suppressNotifications = false;
     public T Value
     {
         get
@@ -73,10 +73,8 @@ public abstract class Property<T> : PropertyBase
             if (_suppressNotifications)
                 return;
 
-            _suppressNotifications = true;
             this._value = value;
             SetValue(value);
-            _suppressNotifications = false;
             OnPropertyChanged();
         }
     }

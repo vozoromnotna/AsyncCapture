@@ -11,7 +11,7 @@ namespace AsyncCapture.Cameras.CameraProperties
 {
     public abstract class COMControllerBase
     {
-        const int _serialTimeout = 25;
+        protected const int _serialTimeout = 25;
         static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
         const int MaxTries = 3;
         SerialPort _serialPort;
