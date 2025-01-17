@@ -117,6 +117,11 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
             await SendCommand(0x01, [0x0F]);
         }
 
+        public async Task FocusStop()
+        {
+            await SendCommand(0x10, []);
+        }
+
         public async Task ZoomBig()
         {
            await SendCommand(0x11, [0x00]);

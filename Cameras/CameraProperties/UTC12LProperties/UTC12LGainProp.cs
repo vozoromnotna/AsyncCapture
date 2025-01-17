@@ -22,6 +22,8 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
             _minValue = 0;
             _maxValue = 255;
             _controller = controller;
+
+            Value = 128;
         }
 
         private int _valueToSet = 0;
@@ -68,6 +70,8 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
             _minValue = 0;
             _maxValue = 255;
             _controller = controller;
+
+            Value = 128;
         }
 
         private int _valueToSet = 0;
