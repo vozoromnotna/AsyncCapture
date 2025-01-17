@@ -155,7 +155,7 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
         public async Task ImageEnhancment(bool status)
         {
             byte[] data = [(byte)(status ? 0x0F : 0x00)]; 
-            await SendCommand(0x01, data);
+            await SendCommand(0x0E, data);
         }
 
         public async Task TimeDomainFilter(bool status)
