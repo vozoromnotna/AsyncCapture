@@ -15,12 +15,12 @@ namespace AsyncCapture.Cameras.CameraProperties.IrayProperties
     }
     public partial class IrayGainControl
     {
-        IrayCOMControl _comControl;
+        IrayComAdapter _comControl;
 
         IrayImageMode _imageMode = IrayImageMode.Auto0;
         public IrayImageMode ImageMode { get => _imageMode; }
 
-        public IrayGainControl(IrayCOMControl comControl)
+        public IrayGainControl(IrayComAdapter comControl)
         {
             _comControl = comControl;
         }

@@ -12,8 +12,8 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
 
         public override string DisplayName => "Авто фокус";
 
-        UTC12LComController _comController;
-        public UTC12LAutoFocusProp(UTC12LComController comController)
+        UTC12LComAdapter _comController;
+        public UTC12LAutoFocusProp(UTC12LComAdapter comController)
         {
             _comController = comController;
         }

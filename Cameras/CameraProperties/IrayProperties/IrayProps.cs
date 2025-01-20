@@ -16,7 +16,7 @@ public class IrayZoomProp : IntProperty
     public override string DisplayName => "Увеличение";
 
 
-    public IrayZoomProp(IrayCOMControl comControl)
+    public IrayZoomProp(IrayComAdapter comControl)
     {
         _comControl = comControl;
         _zoomValue = comControl.GetZoomPosition().Result;
@@ -24,7 +24,7 @@ public class IrayZoomProp : IntProperty
         _maxValue = _comControl.MaxZoomPosition;
     }
 
-    private IrayCOMControl _comControl;
+    private IrayComAdapter _comControl;
 
     int _zoomValue;
     public override int GetValue()
@@ -94,7 +94,7 @@ public class IrayFocusProp : IntProperty
     public override string DisplayName => "Фокус";
 
 
-    public IrayFocusProp(IrayCOMControl comControl)
+    public IrayFocusProp(IrayComAdapter comControl)
     {
         _comControl = comControl;
         _focusValue = _comControl.GetFocusPosition().Result;
@@ -102,7 +102,7 @@ public class IrayFocusProp : IntProperty
         _minValue = _comControl.MinFocusPosition;
     }
 
-    private IrayCOMControl _comControl;
+    private IrayComAdapter _comControl;
 
     int _focusValue;
     public override int GetValue()
@@ -184,8 +184,8 @@ public class IrayAutoFocus : ButtonProperty
     }
 
     private IrayFocusProp _focusProp;
-    private IrayCOMControl _comControl;
-    public IrayAutoFocus(IrayCOMControl comControl, IrayFocusProp focusProp)
+    private IrayComAdapter _comControl;
+    public IrayAutoFocus(IrayComAdapter comControl, IrayFocusProp focusProp)
     {
         _comControl = comControl;
         _focusProp = focusProp;
@@ -194,13 +194,13 @@ public class IrayAutoFocus : ButtonProperty
 
 public class IrayPaletteProp : ListProperty
 {
-    IrayCOMControl _comControl;
+    IrayComAdapter _comControl;
     public override string Name => "Palette";
 
     public override string DisplayName => "Палитра";
 
     private Dictionary<string, byte[]> nameBytesPairs;
-    public IrayPaletteProp(IrayCOMControl comControl)
+    public IrayPaletteProp(IrayComAdapter comControl)
     {
         _comControl = comControl;
         values = new System.Collections.ObjectModel.ObservableCollection<string>

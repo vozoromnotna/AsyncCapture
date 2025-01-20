@@ -12,8 +12,8 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
 
         public override string DisplayName => "Авто калибровка";
 
-        UTC12LComController _comController;
-        public UTC12LAutoCalibrationProp(UTC12LComController comController)
+        UTC12LComAdapter _comController;
+        public UTC12LAutoCalibrationProp(UTC12LComAdapter comController)
         {
             _comController = comController;
             Value = true;

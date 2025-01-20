@@ -16,8 +16,8 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
 
         public override string DisplayName => "Усиление";
 
-        private UTC12LComController _controller;
-        public UTC12LGainProp(UTC12LComController controller) 
+        private UTC12LComAdapter _controller;
+        public UTC12LGainProp(UTC12LComAdapter controller) 
         {
             _minValue = 0;
             _maxValue = 255;
@@ -64,8 +64,8 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
 
         public override string DisplayName => "Яркость";
 
-        private UTC12LComController _controller;
-        public UTC12LBrightnessProp(UTC12LComController controller)
+        private UTC12LComAdapter _controller;
+        public UTC12LBrightnessProp(UTC12LComAdapter controller)
         {
             _minValue = 0;
             _maxValue = 255;

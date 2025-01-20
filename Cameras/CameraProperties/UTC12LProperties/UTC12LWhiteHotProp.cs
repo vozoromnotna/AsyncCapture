@@ -12,8 +12,8 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
 
         public override string DisplayName => "White Hot";
 
-        private UTC12LComController _comController;
-        public UTC12LWhiteHotProp(UTC12LComController comController)
+        private UTC12LComAdapter _comController;
+        public UTC12LWhiteHotProp(UTC12LComAdapter comController)
         {
             _comController = comController;
             Value = true;

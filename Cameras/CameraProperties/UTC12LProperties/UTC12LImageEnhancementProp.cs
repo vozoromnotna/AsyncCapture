@@ -12,8 +12,8 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
 
         public override string DisplayName => "Улучшение изображения";
 
-        UTC12LComController _comController;
-        public UTC12LImageEnhancementProp(UTC12LComController comController)
+        UTC12LComAdapter _comController;
+        public UTC12LImageEnhancementProp(UTC12LComAdapter comController)
         {
             _comController = comController;
             Value = false;

@@ -1,4 +1,9 @@
 ﻿using DirectShowLib.BDA;
+using SerialDevicesLib.Classes.Devices;
+using SerialDevicesLib.Classes.SerialDeviceInfo;
+using SerialDevicesLib.Classes.SerialMessages;
+using SerialDevicesLib.Classes.SerialResponseValidators;
+using SerialDevicesLib.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;
@@ -9,22 +14,23 @@ using System.Xaml;
 
 namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
 {
-    public class UTC12LComController : COMControllerBase
+    public class UTC12LComDeviceInfo : ComDeviceInfo
     {
-        private const byte DeviceAddress = 0x26;
-        private const byte StartByte = 0xF0;
-        private const byte EndByte = 0xFF;
-        public UTC12LComController(string comPortName) : base(comPortName)
+
+        public UTC12LComDeviceInfo()
         {
-        }
-        public override byte[] GetTestRequest()
-        {
-            return CreateRequest(0x00);
+            _baundRate = 115200;
+            _validator = new SimpleResponseValidator(Validator);
+            _testValidator = new SimpleResponseValidator(TestValidator);
+            _testRequest = new ByteSerialMessage([0xF0, 0x02, 0x26, 0x00, 0x26, 0xFF]);
+            Timeout = 200;
         }
 
-        protected override bool IsCorrect(byte[]? bytes)
+        bool Validator(ISerialMessage message)
         {
-            if (bytes.Length < 3) 
+            var bytes = message.GetBytes();
+
+            if (bytes.Length < 3)
                 return false;
 
             if (bytes[0] != 0xF0)
@@ -36,11 +42,36 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
             return true;
         }
 
-        protected override SerialPort OpenSerialPort(string comPortName)
+        bool TestValidator(ISerialMessage message) 
         {
-            var sp = new SerialPort(comPortName, 115200);
-            sp.Open();
-            return sp;
+            var bytes = message.GetBytes();
+
+            if (bytes.Length < 22)
+                return false;
+
+            if (bytes[0] != 0xF0)
+                return false;
+
+            if (bytes[^1] != 0xFF)
+                return false;
+
+            if (bytes[1] == 0x02 && bytes[2] == 0x26 && bytes[3] == 0x00 && bytes[4] == 0x026)
+                return false;
+
+            return true;
+        }
+
+    }
+    public class UTC12LComAdapter
+    {
+        private const byte DeviceAddress = 0x26;
+        private const byte StartByte = 0xF0;
+        private const byte EndByte = 0xFF;
+        ISerialDevice _comDevice;
+        public UTC12LComAdapter(ISerialDevice comDevice)
+        {
+            _comDevice = comDevice;
+            _comDevice.Open();
         }
 
         private byte[] CreateRequest(byte instruction, byte[] data = null)
@@ -97,14 +128,16 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
         public async Task SendCommand(byte instruction, byte[] data = null)
         {
             var req = CreateRequest(instruction, data);
-            await SendRequest(req);
+            var message = new ByteSerialMessage(req);
+            await _comDevice.SendOneWayRequest(message);
         }
 
         public async Task<byte[]> GetResponse(byte instruction, byte[] data = null)
         {
             var req = CreateRequest(instruction, data);
-            var resp = await ReciveResponce(req);
-            return resp;
+            var message = new ByteSerialMessage(req);
+            var resp = await _comDevice.SendTwoWayRequest(message);
+            return resp.GetBytes();
         }
 
         public async Task FocusNear()
