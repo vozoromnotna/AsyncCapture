@@ -18,7 +18,7 @@ namespace AsyncCapture.Cameras.CameraProperties.IrayProperties
     public class IrayComDeviceInfo : ComDeviceInfo
     {
         readonly static HashSet<byte> ErrorCodes = [0xF1, 0xFB, 0xFD, 0xFF];
-        public IrayComDeviceInfo() 
+        public IrayComDeviceInfo() : base("IrayCom") 
         {
             _baundRate = 115200;
             _validator = new SimpleResponseValidator(Validator);

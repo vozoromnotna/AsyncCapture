@@ -17,7 +17,7 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
     public class UTC12LComDeviceInfo : ComDeviceInfo
     {
 
-        public UTC12LComDeviceInfo()
+        public UTC12LComDeviceInfo() : base("UTC12LCom")
         {
             _baundRate = 115200;
             _validator = new SimpleResponseValidator(Validator);
