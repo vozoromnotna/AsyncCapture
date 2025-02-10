@@ -121,14 +121,20 @@ public sealed class ToupCS : CameraSource
 
         try
         {
+            _nncam.get_ExpoTime(out var expoTime);
+            _nncam.get_ExpoAGain(out var gain);
             var mat = new Mat(new OpenCvSharp.Size(_width, _height), MatType.CV_8UC3);
             try
             {
-                var bOK = _nncam.PullImageV3(mat.Data, 0, 24, (int)mat.Step(), out var info); // check the return value
+                var bOK = _nncam.PullImageV3(mat.Data, 0, 24, (int)mat.Step(), out var info);
             }
             finally
             {
-                var meta = new Dictionary<string, object>();
+                var meta = new Dictionary<string, object>
+                {
+                    { "exposition", (int)expoTime },
+                    { "gain", (int)gain }
+                };
 
                 if (_isLive)
                     await imageGetted(mat, meta);
