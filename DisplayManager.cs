@@ -29,5 +29,20 @@ namespace AsyncCapture
         {
             return _sinks[0];
         }
+
+        public void Start()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Stop()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task WaitAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

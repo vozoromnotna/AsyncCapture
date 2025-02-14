@@ -19,4 +19,9 @@ public class ColorConvertSinkSource : MatSource, ISinkSource<Mat>
         Cv2.CvtColor(image, image, _colorConversionCode);
         await imageGetted(image, meta);
     }
+
+    public override void Stop()
+    {
+        throw new NotImplementedException();
+    }
 }

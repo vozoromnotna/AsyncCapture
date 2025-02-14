@@ -76,4 +76,9 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
 
         return directoryPath;
     }
+
+    public override void Stop()
+    {
+        throw new NotImplementedException();
+    }
 }

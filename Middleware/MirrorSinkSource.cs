@@ -19,6 +19,11 @@ public class FlipSinkSource : MatSource, ISinkSource<Mat>
         Cv2.Flip(image, image, _flipMode);
         await imageGetted(image, meta);
     }
+
+    public override void Stop()
+    {
+        throw new NotImplementedException();
+    }
 }
 
 public class SimpleSinkSource : MatSource, ISinkSource<Mat>
@@ -33,5 +38,10 @@ public class SimpleSinkSource : MatSource, ISinkSource<Mat>
     {
         _operation(image);
         await imageGetted(image, meta);
+    }
+
+    public override void Stop()
+    {
+        throw new NotImplementedException();
     }
 }

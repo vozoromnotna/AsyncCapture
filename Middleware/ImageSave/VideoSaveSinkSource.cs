@@ -70,5 +70,9 @@ public class VideoSaveSinkSource : MatSaverSinkSourceBase
     {
         _gstStream.EndOfStream();
     }
-    
+
+    public override void Stop()
+    {
+        throw new NotImplementedException();
+    }
 }

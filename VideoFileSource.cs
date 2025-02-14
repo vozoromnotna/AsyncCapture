@@ -24,6 +24,8 @@ namespace AsyncCapture
         TaskCompletionSource _tcs;
         public override void Start()
         {
+            base.Start();
+
             _cts = new CancellationTokenSource();
             _tcs = new TaskCompletionSource();
             var token = _cts.Token;
@@ -31,11 +33,19 @@ namespace AsyncCapture
             Task.Run(async () =>
             {
                 var frame = new Mat();
-                while (!token.IsCancellationRequested || _videoCapture.Read(frame))
+                while (!token.IsCancellationRequested)
                 {
-                    var meta = new Dictionary<string, object>();
-                    meta["fps"] = _videoCapture.Fps;
-                    await imageGetted(frame, meta);
+                    if (_videoCapture.Read(frame))
+                    {
+                        var meta = new Dictionary<string, object>();
+                        meta["fps"] = _videoCapture.Fps;
+                        await imageGetted(frame, meta);
+                    }
+                    else
+                    {
+                        break;
+                    }
+
                 }
 
                 _tcs.SetResult();

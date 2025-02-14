@@ -52,6 +52,11 @@ public class WriteTextSinkSource : MatSource, ISinkSource<Mat>
                     _color,
                     thickness: _thickness);
     }
+
+    public override void Stop()
+    {
+        throw new NotImplementedException();
+    }
 }
 
 public class WriteTimeSinkSource : WriteTextSinkSource

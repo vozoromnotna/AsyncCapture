@@ -22,6 +22,11 @@ public class EightEyeChannel : MatSource, ISinkSource<Mat>
     {
         await _concatenator.PutImage(image, meta, this);
     }
+
+    public override void Stop()
+    {
+        throw new NotImplementedException();
+    }
 }
 public class EightEyeConcatenator : MatSource
 {
@@ -97,6 +102,11 @@ public class EightEyeConcatenator : MatSource
         Cv2.HConcat(mats.Skip(MaxImages / 2), lower);
         Cv2.VConcat(new List<Mat> { upper, lower }, output);
         return output;
+    }
+
+    public override void Stop()
+    {
+        throw new NotImplementedException();
     }
 }
 

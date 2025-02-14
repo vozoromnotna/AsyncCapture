@@ -65,5 +65,8 @@ public class CameraProcessor : MatSource, ISinkSource<Mat>, INotifyPropertyChang
             PropertyChanged(this, new PropertyChangedEventArgs(prop));
     }
 
-    
+    public override void Stop()
+    {
+        throw new NotImplementedException();
+    }
 }

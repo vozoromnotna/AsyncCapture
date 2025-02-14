@@ -27,4 +27,9 @@ public class ScaleImageSinkSource : MatSource, ISinkSource<Mat>
 
         await imageGetted(scaledImage, meta);
     }
+
+    public override void Stop()
+    {
+        throw new NotImplementedException();
+    }
 }
