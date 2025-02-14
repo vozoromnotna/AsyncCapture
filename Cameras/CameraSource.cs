@@ -67,6 +67,17 @@ abstract public class CameraSource : MatSource, INotifyPropertyChanged, IPropert
     }
 
     public abstract bool IsLive {  get; }
+
+    public override void Start()
+    {
+        base.Start();
+        StartLive();
+    }
+
+    public override void Stop()
+    {
+        StopLive();
+    }
     public abstract void StartLive();
 
     public abstract void StopLive();

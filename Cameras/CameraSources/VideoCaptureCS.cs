@@ -39,6 +39,7 @@ public class VideoCaptureCS : CameraSource
                 if (_videoCapture.Read(frame))
                 {
                     var meta = new Dictionary<string, object>();
+                    meta["fps"] = _videoCapture.Fps;
                     await imageGetted(frame, meta);
                     
                 }

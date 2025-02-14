@@ -12,6 +12,12 @@ namespace AsyncCapture
         public event EventHandler EndOfStream;
         void SetSink(ISink<T> sink);
 
+        void Start();
+
+        void Stop();
+
+        Task WaitAsync();
+
         ISink<T> GetSink();
     }
 
@@ -21,9 +27,12 @@ namespace AsyncCapture
 
 		public event EventHandler EndOfStream;
 
+        protected TaskCompletionSource _endOfStreamTCS;
+
         protected void RiseEndOfStream()
         {
             EndOfStream?.Invoke(this, EventArgs.Empty);
+            _endOfStreamTCS.SetResult();
         }
 
 		public ISink<T> GetSink()
@@ -42,6 +51,15 @@ namespace AsyncCapture
                 await _sink?.PutImage(image, meta);
         }
 
+        public virtual void Start()
+        {
+            _endOfStreamTCS = new TaskCompletionSource();
+        }
+        public abstract void Stop();
+        public async Task WaitAsync()
+        {
+            await _endOfStreamTCS.Task;
+        }
     }
 
     abstract public class MatSource : SourceBase<Mat>
@@ -52,14 +70,15 @@ namespace AsyncCapture
         private Dictionary<string, object> _lastMeta;
         protected override async Task imageGetted(Mat image, Dictionary<string, object> meta)
         {
+            _last = image;
+            _lastMeta = meta;
+
             if (_isLastCapture)
             {
-                _last = image.Clone();
-                _lastMeta = meta;
                 _lastCapture.SetResult();
                 _isLastCapture = false;
             }
-                
+
             await base.imageGetted(image, meta);
         }
 
@@ -73,10 +92,7 @@ namespace AsyncCapture
 
         public async Task ReproccessLast()
         {
-            using (_last)
-            {
-                await base.imageGetted(_last, _lastMeta);
-            }
+            await base.imageGetted(_last, _lastMeta);
         }
     }
 
