@@ -32,7 +32,7 @@ namespace AsyncCapture
         protected void RiseEndOfStream()
         {
             EndOfStream?.Invoke(this, EventArgs.Empty);
-            _endOfStreamTCS.SetResult();
+            _endOfStreamTCS?.SetResult();
         }
 
 		public ISink<T> GetSink()
