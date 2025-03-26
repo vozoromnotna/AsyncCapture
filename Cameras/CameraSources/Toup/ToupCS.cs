@@ -17,6 +17,7 @@ using OpenCvSharp.Extensions;
 using static Tcam;
 using AsyncCapture.Cameras.CameraProperties;
 using OpenCvSharp;
+using System.Dynamic;
 
 namespace AsyncCapture.Cameras.CameraSources.Toup;
 
@@ -116,6 +117,34 @@ public sealed class ToupCS : CameraSource
 
     }
 
+    private async Task Get16Bit()
+    {
+        try
+        {
+            _nncam.get_ExpoTime(out var expoTime);
+            _nncam.get_ExpoAGain(out var gain);
+            var mat = new Mat(new OpenCvSharp.Size(_width, _height), MatType.CV_16U);
+            try
+            {
+                var bOK = _nncam.PullImageV3(mat.Data, 0, 16 , (int)mat.Step(), out var info);
+            }
+            finally
+            {
+                var meta = new Dictionary<string, object>
+                {
+                    { "exposition", (int)expoTime },
+                    { "gain", (int)gain }
+                };
+
+                if (_isLive)
+                    await imageGetted(mat, meta);
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.ToString());
+        }
+    }
     private async void OnEventImageToFilter()
     {
 

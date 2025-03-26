@@ -109,6 +109,11 @@ public class ImgFormatBlank : ListProperty
     public override string Name => "Format";
 
     public override string DisplayName => "Формат изображения";
+
+    protected override void SelectedItemChanged()
+    {
+        
+    }
 }
 
 public class DoubleToPecloWrapper : PelcoButtonProperty

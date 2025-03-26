@@ -21,7 +21,7 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
 
         public override void SetValue(bool val)
         {
-            _comController.WhiteHot(_value);
+            _comController.WhiteHot(!_value);
         }
     }
 }

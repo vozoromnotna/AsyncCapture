@@ -67,7 +67,7 @@ public abstract class Property<T> : PropertyBase
         }
         set
         {
-            if (IsEnabled == false || EqualityComparer<T>.Default.Equals(_value, value)) 
+            if (IsEnabled == false ) 
                 return;
 
             if (_suppressNotifications)
@@ -434,10 +434,7 @@ public abstract class ListProperty : PropertyBase
         }
     }
 
-    protected virtual void SelectedItemChanged()
-    {
-       
-    }
+    protected abstract void SelectedItemChanged();
 
     protected virtual ObservableCollection<string> GetValues()
     {

@@ -140,24 +140,16 @@ public sealed class Ic4CS : CameraSource
     }
 
     PropCommand _trigger;
-    void initSink()
+    async Task initSink()
     {
         var sink = new QueueSink();
-        sink.FramesQueued += Sink_FramesQueued;
+        sink.FramesQueued += Sink_FramesQueued1;
         _grabber.StreamSetup(sink, StreamSetupOption.AcquisitionStart);
 
     }
 
-    void restartSink()
+    private async void Sink_FramesQueued1(object? sender, QueueSinkEventArgs e)
     {
-        disposeSink();
-        initSink();
-    }
-
-    bool _locker = false;
-    private async void Sink_FramesQueued(object sender, QueueSinkEventArgs e)
-    {
-
         var sink = _grabber.Sink as QueueSink;
         if (sink == null)
             return;
@@ -168,11 +160,18 @@ public sealed class Ic4CS : CameraSource
             var meta = new Dictionary<string, object>();
             await imageGetted(buffer.CreateOpenCvWrap(), meta);
         }
-            
+
 
         //_trigger.Execute();
-
     }
+
+    void restartSink()
+    {
+        disposeSink();
+        initSink();
+    }
+
+    bool _locker = false;
 
     public override void Dispose()
     {

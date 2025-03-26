@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AsyncCapture.Cameras.CameraSources.Ic4;
 
-public record CalibData(Array Pos, List<Mat> Vin, List<Mat> Dist, List<Mat> Mtx);
+public record CalibData(Array Pos, List<Mat> Vin, List<Mat> Dist, List<Mat> Mtx, Array Wave);
 public class CalibDataReader
 {
     public CalibData ReadData(string fileName)
@@ -26,14 +26,14 @@ public class CalibDataReader
         (_, var vin) = Hdf5.ReadDataset<double>(fileId, "/vin");// [8, 1600, 1000]
         (_, var dist) = Hdf5.ReadDataset<double>(fileId, "/dist/dist");// [8, 1, 5]
         (_, var mtx) = Hdf5.ReadDataset<double>(fileId, "/dist/mtx");// [8, 3, 3]
-
+        (_, var wave) = Hdf5.ReadDataset<double>(fileId, "/wave");
 
         var vinList =
             readArrayData(vin, (x) => 1.0 / x);
         var distList = readArrayData(dist);
         var mtxList = readArrayData(mtx);
-
-        return new CalibData(pos, vinList, distList, mtxList);
+ 
+        return new CalibData(pos, vinList, distList, mtxList, wave);
     }
 
     double[] getSubArray(Array array, int index, Func<double, double> func)

@@ -113,7 +113,6 @@ public class ToupResolution : ListProperty
 
     protected override void SelectedItemChanged()
     {
-        base.SelectedItemChanged();
         nncam.Stop();
 
         nncam.put_eSize(Convert.ToUInt32(selectedIndex));
@@ -151,7 +150,6 @@ public class ToupFilterResolution : ListProperty
 
     protected override void SelectedItemChanged()
     {
-        base.SelectedItemChanged();
         nncam.Stop();
 
         nncam.put_eSize(Convert.ToUInt32(selectedIndex));

@@ -15,11 +15,24 @@ public class EightEyeProcessor : ISink<Mat>
 {
     public static int[] GetWavelengths()
     {
-        return [700, 750, 800, 650, 600, 550, 500, 450];
+        return [450, 500, 550, 600, 650, 700, 750, 800];
     }
+    public int[] GetOrderedWavelengths()
+    {
+        var wavelengths = new int[_calibData.Wave.Length];
+        for (int i = 0; i < _calibData.Wave.Length; i++)
+        {
+            wavelengths[i] = (int)(double)_calibData.Wave.GetValue(i, 0);
+        }
+        return wavelengths;
+        
+    }
+
+    private int[] _wavelengths;
     public EightEyeProcessor(CalibData calibData)
     {
         _calibData = calibData;
+        _wavelengths = GetOrderedWavelengths();
     }
 
     private CalibData? _calibData;
@@ -35,8 +48,6 @@ public class EightEyeProcessor : ISink<Mat>
     }
 
     public ISink<Mat>[] sinks = new ISink<Mat>[8];
-
-    int[] _wavelengths = GetWavelengths();
 
     private Mat[] proccess(Mat input)
     {
@@ -101,7 +112,7 @@ public class EightEyeProcessor : ISink<Mat>
     public async Task PutImage(Mat image, Dictionary<string, object> meta)
     {
         var res = proccess(image);
-
+        
         await Parallel.ForAsync(0, 8, async (i, token) =>
         {
             var newMeta = new Dictionary<string, object>();

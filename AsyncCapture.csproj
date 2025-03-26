@@ -12,8 +12,8 @@
     <PackageReference Include="Extended.Wpf.Toolkit" Version="4.6.1" />
     <PackageReference Include="gstreamer-sharp-netcore" Version="0.0.8" />
     <PackageReference Include="HDF5-CSharp" Version="1.19.0" />
-    <PackageReference Include="ic4dotnet" Version="1.1.1.2839" />
-    <PackageReference Include="ic4dotnet.OpenCvSharp" Version="1.1.1.2839" />
+    <PackageReference Include="ic4dotnet" Version="1.2.0.2954" />
+    <PackageReference Include="ic4dotnet.OpenCvSharp" Version="1.2.0.2954" />
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Nito.AsyncEx.Context" Version="5.1.2" />
