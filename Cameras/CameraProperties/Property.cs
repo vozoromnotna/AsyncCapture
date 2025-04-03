@@ -25,7 +25,15 @@ public abstract class PropertyBase : INotifyPropertyChanged
     }
 
     protected bool _isEnabled = true;
-    virtual public bool IsEnabled { get => _isEnabled; set { _isEnabled = value; OnPropertyChanged(); } }
+    virtual public bool IsEnabled 
+    { 
+        get => _isEnabled; 
+        set 
+        { 
+            _isEnabled = value; 
+            OnPropertyChanged(); 
+        } 
+    }
 
     public virtual void Update() { }
 
@@ -67,7 +75,7 @@ public abstract class Property<T> : PropertyBase
         }
         set
         {
-            if (IsEnabled == false ) 
+            if (!_isEnabled) 
                 return;
 
             if (_suppressNotifications)
@@ -108,7 +116,7 @@ public abstract class Property<T> : PropertyBase
         var oldEnabled = IsEnabled;
        // IsEnabled = true;
         _value = GetValue();
-        OnPropertyChanged("Value");
+        OnPropertyChanged(nameof(Value));
         //IsEnabled = oldEnabled;
     }
 

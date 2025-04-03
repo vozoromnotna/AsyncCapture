@@ -28,7 +28,7 @@ public sealed class ToupCS : CameraSource
     public ToupCS(Tcam nncam)
     {
         _nncam = nncam;
-        startDevice(nncam);
+        startDeviceRaw(nncam);
     }
 
 
@@ -48,10 +48,12 @@ public sealed class ToupCS : CameraSource
     private int _width;
     private int _height;
 
+    private bool _isRaw = false;
     private void startDevice(Tcam nncam)
     {
         if (nncam != null)
         {
+            _isRaw = false;
             var res = nncam.put_Option(eOPTION.OPTION_RAW, 0);
             res = nncam.put_Option(eOPTION.OPTION_RGB, 0); // RGB24
             nncam.put_Option(eOPTION.OPTION_BITDEPTH, 0);
@@ -77,9 +79,10 @@ public sealed class ToupCS : CameraSource
     {
         if (nncam != null)
         {
+            _isRaw = true;
             var res = nncam.put_Option(eOPTION.OPTION_RAW, 1);
-            res = nncam.put_Option(eOPTION.OPTION_RGB, 4); // RGB24
-            nncam.put_Option(eOPTION.OPTION_BITDEPTH, 1);
+            res = nncam.put_Option(eOPTION.OPTION_RGB, 4);
+            res = nncam.put_Option(eOPTION.OPTION_BITDEPTH, 1);
 
 
             uint resnum = _nncam.ResolutionNumber;
@@ -151,7 +154,7 @@ public sealed class ToupCS : CameraSource
         {
             _nncam.get_ExpoTime(out var expoTime);
             _nncam.get_ExpoAGain(out var gain);
-            var mat = new Mat(new OpenCvSharp.Size(_width, _height), MatType.CV_16U);
+            var mat = new Mat(new OpenCvSharp.Size(_width, _height), MatType.CV_16UC1);
             try
             {
                 var bOK = _nncam.PullImageV3(mat.Data, 0, 16 , (int)mat.Step(), out var info);
@@ -173,9 +176,9 @@ public sealed class ToupCS : CameraSource
             MessageBox.Show(ex.ToString());
         }
     }
-    private async void OnEventImageToFilter()
-    {
 
+    private async Task Get8Bit()
+    {
         try
         {
             _nncam.get_ExpoTime(out var expoTime);
@@ -201,6 +204,14 @@ public sealed class ToupCS : CameraSource
         {
             MessageBox.Show(ex.ToString());
         }
+    }
+    private async void OnEventImageToFilter()
+    {
+
+        if (_isRaw)
+            await Get16Bit();
+        else
+            await Get8Bit();
 
 
     }

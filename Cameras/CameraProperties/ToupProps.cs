@@ -77,6 +77,12 @@ public sealed class ToupExp : DoubleProperty
         _isLogarithmic = true;
     }
 
+    public override double GetValue()
+    {
+        uint value = 0;
+        nncam?.get_ExpoTime(out value);
+        return (double)value;
+    }
 
     public override void SetValue(double val)
     {
