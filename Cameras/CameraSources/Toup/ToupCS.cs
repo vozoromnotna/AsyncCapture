@@ -52,8 +52,36 @@ public sealed class ToupCS : CameraSource
     {
         if (nncam != null)
         {
+            var res = nncam.put_Option(eOPTION.OPTION_RAW, 0);
+            res = nncam.put_Option(eOPTION.OPTION_RGB, 0); // RGB24
             nncam.put_Option(eOPTION.OPTION_BITDEPTH, 0);
-            var res = nncam.put_Option(eOPTION.OPTION_RGB, 0); // RGB24
+            uint resnum = _nncam.ResolutionNumber;
+            uint eSize = 0;
+            if (_nncam.get_eSize(out eSize))
+            {
+
+                if (nncam.get_Size(out _width, out _height))
+                {
+                    if (!nncam.StartPullModeWithCallback(new DelegateEventCallback(DelegateOnEventCallback)))
+                        throw new Exception("Failed to start camera");
+                }
+            }
+            nncam.put_VFlip(false);
+            nncam.put_HFlip(true);
+
+            nncam.get_RawFormat(out uint nFourCC, out uint bitdepth);
+        }
+    }
+
+    private void startDeviceRaw(Tcam nncam)
+    {
+        if (nncam != null)
+        {
+            var res = nncam.put_Option(eOPTION.OPTION_RAW, 1);
+            res = nncam.put_Option(eOPTION.OPTION_RGB, 4); // RGB24
+            nncam.put_Option(eOPTION.OPTION_BITDEPTH, 1);
+
+
             uint resnum = _nncam.ResolutionNumber;
             uint eSize = 0;
             if (_nncam.get_eSize(out eSize))
