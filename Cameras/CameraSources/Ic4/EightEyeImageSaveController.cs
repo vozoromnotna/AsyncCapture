@@ -20,7 +20,7 @@ public class EightEyeImageSaverSink : ImageSaveSinkSource
 
     protected override string GetRecordDirectoryPath()
     {
-        return $"{_saveController.GetDirectory()}{_name}\\";
+        return $"{_saveController.GetDirectory()}\\{_name}\\";
     }
 
     protected override async Task SaveImage(Mat image, Dictionary<string, object> meta)
@@ -109,8 +109,8 @@ public class EightEyeImageSaveController : ImageSaveSinkSource
     public override void Single()
     {
         _counter = 0;
-        _saveSingle = true;
         _recordDirectoryPath = GetSingleDirectoryPath();
+        _saveSingle = true;
         foreach(var saver in _savers)
         {
             saver.Single();

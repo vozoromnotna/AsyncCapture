@@ -55,12 +55,33 @@ public class Ic4ExposureController : INotifyPropertyChanged
 
 public class Ic4ExposureTimeProp : DoubleProperty
 {
-    public override double MinIncrement => _exposureController.ExposureTimeIncrement;
+    public override double MinIncrement => _exposureController.ExposureTimeIncrement * (_isMilliseconds ? 0.001 : 1);
 
     public override string Name => "Exposure_Time";
 
-    public override string FormatString => "0";
-    public override string DisplayName => "Экспозиция, мкс";
+    private bool _isMilliseconds = false;
+    public bool IsMilliseconds
+    {
+        get => _isMilliseconds;
+        set
+        {
+            _isMilliseconds = value;
+            (_minValue, _maxValue) = _exposureController.ExposureTimeBounds;
+            if (IsMilliseconds)
+            {
+                _minValue = _minValue * 0.001;
+                _maxValue = _maxValue * 0.001;
+            }
+            OnPropertyChanged(nameof(MinValue));
+            OnPropertyChanged(nameof(MaxValue));
+            OnPropertyChanged(nameof(DisplayName));
+            OnPropertyChanged(nameof(Value));
+        }
+    }
+        
+
+    public override string FormatString => (_isMilliseconds ? "0.0000" : "0");
+    public override string DisplayName => "Экспозиция, " + (_isMilliseconds ? "мс" : "мкс");
 
     private readonly Ic4ExposureController _exposureController;
 
@@ -108,11 +129,18 @@ public class Ic4ExposureTimeProp : DoubleProperty
 
     public override double GetValue()
     {
-        return _exposureController.ExposureTime;
+        var expTime = _exposureController.ExposureTime;
+        if (IsMilliseconds)
+            expTime *= 0.001;
+        return expTime;
     }
     public override void SetValue(double val)
     {
-        _exposureController.ExposureTime = val;
+        var expTime = val;
+        if (IsMilliseconds)
+            expTime *= 1000;
+
+        _exposureController.ExposureTime = expTime;
     }
 }
 

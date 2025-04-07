@@ -33,6 +33,10 @@ public abstract class MatSaverSinkSourceBase : MatSource, ISinkSource<Mat>, ISav
     protected string _directoryPath;
     protected string _recordDirectoryPath;
 
+    public string RecordDirectoryPath
+    {
+        get => _recordDirectoryPath;
+    }
     public string DirectoryPath 
     { 
         get => _directoryPath; 
