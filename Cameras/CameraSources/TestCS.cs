@@ -1,5 +1,6 @@
 ﻿using Gst;
 using OpenCvSharp;
+using ScottPlot.Drawing.Colormaps;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace AsyncCapture.Cameras.CameraSources
 
         public int Width { get; set; } = 1920;
         public int Height { get; set; } = 1080;
-        public double Fps { get; set; } = 60.0;
+        public double Fps { get; set; } = 120.0;
         public MatType MatType { get; set; } = MatType.CV_8UC1;
         public override string Name => "TestSource";
 
@@ -27,6 +28,20 @@ namespace AsyncCapture.Cameras.CameraSources
         public override bool IsLive { get => _isLive; }
 
 
+        double[] _pregenValues;
+        private void PregenValues(int heigth, double maxIntensity)
+        {
+            _pregenValues = new double[heigth * 2];
+            for (int i = 0; i < _pregenValues.Length; i++)
+            {
+                _pregenValues[i] = (Math.Cos(Math.PI * (i) / Height) + 1) * maxIntensity / 2.0;
+            }
+        }
+        private double GetValue(int phase, int height)
+        {
+            var curPhase = phase % (2 * height);
+            return _pregenValues[curPhase];
+        }
 
         CancellationTokenSource _cts;
         public void StartImage()
@@ -48,25 +63,28 @@ namespace AsyncCapture.Cameras.CameraSources
                 int colorCount = 0;
                 int x = Height / 2;
                 int y = Width / 2;
+                var channels = MatType.Channels;
+                var depth = MatType.Depth;
+                var maxIntensity = Math.Pow(2, (depth / channels) * 8) - 1;
+                double[,] imageData = new double[Height, Width];
 
+                PregenValues(Height, maxIntensity);
                 while (!token.IsCancellationRequested)
                 {
-                   // var waitTask = Task.Delay((int)((1.0 / Fps) * 1000));
-                    var image = new Mat(Height, Width, MatType);
-                    var channels = image.Channels();
-                    var maxIntensity = Math.Pow(2, (image.ElemSize()/channels) * 8) - 1;
-                    double[,] imageData = new double[Height, Width];
-                    Parallel.For(0, image.Rows, (i) =>
+                    var timeout = (int)((1.0 / Fps) * 1000);
+                    var waitTask = Task.Delay(timeout);
+                    
+                    Parallel.For(0, Height, i =>
                     {
-                        for (int j = 0; j < image.Cols; j++)
+                        var value = GetValue(i + phase, Height);
+                        for (int j = 0; j < Width; j++)
                         {
-                            var value = (Math.Cos(Math.PI * (j - phase) / image.Cols) + 1) * maxIntensity / 2.0;
                             imageData[i, j] = value;
                         }
                     });
 
-                    var tempMat = Mat.FromArray(imageData);
-                    tempMat.ConvertTo(image, MatType);
+                    var image = Mat.FromArray(imageData);
+                    image.ConvertTo(image, MatType);
                     if (channels == 3)
                     {
                         Cv2.CvtColor(image, image, ColorConversionCodes.GRAY2BGR);
@@ -120,8 +138,10 @@ namespace AsyncCapture.Cameras.CameraSources
                     {
                         increment *= -1;
                     }
+
                     Dictionary<string, object> meta = new();
-                    await imageGetted(image, meta);
+
+                    Task.WaitAll(waitTask, imageGetted(image, meta));
                 }
 
             }, token);
