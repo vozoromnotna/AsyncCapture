@@ -94,7 +94,7 @@ public class EightEyeProcessor : ISink<Mat>
     private bool _vignetting = false;
     public bool VignettingRemove { get => _vignetting; set => _vignetting = value; }
 
-    private bool _distortion = true;
+    private bool _distortion = false;
 
     public bool DistortionRemove { get => _distortion; set => _distortion = value; }
 
