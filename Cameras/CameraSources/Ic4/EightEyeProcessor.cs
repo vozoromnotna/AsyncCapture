@@ -62,32 +62,33 @@ public class EightEyeProcessor : ISink<Mat>
 
         var outArray = new Mat[8]; 
 
-        Parallel.For(0, vinList.Count, (i) =>
-        {
-            var vinMat = vinList[i];
-
-            var distMat = distList[i];
-
-            var mtxMat = mtxList[i];
-
-
-            var rect = new OpenCvSharp.Rect((int)pos.GetValue(i, 0), (int)pos.GetValue(i, 1), (int)pos.GetValue(i, 2), (int)pos.GetValue(i, 3));
-            outArray[i] = new Mat(input, rect);
-            var output = outArray[i];
-
-            if (_vignetting)
+        //for (int i = 0; i < vinList.Count; i++)
+        //{
+            Parallel.For(0, vinList.Count, (i) =>
             {
-                RemoveVignetting(output, output, vinMat);
-            }
-            
-            if (_distortion)
-            {
-                RemoveDistortion(output, output, distMat, mtxMat);
-            }
-            
+                var vinMat = vinList[i];
 
-        });
-        
+                var distMat = distList[i];
+
+                var mtxMat = mtxList[i];
+
+
+                var rect = new OpenCvSharp.Rect((int)pos.GetValue(i, 0), (int)pos.GetValue(i, 1), (int)pos.GetValue(i, 2), (int)pos.GetValue(i, 3));
+                outArray[i] = new Mat(input, rect);
+                var output = outArray[i];
+
+                if (_vignetting)
+                {
+                    RemoveVignetting(output, output, vinMat);
+                }
+
+                if (_distortion)
+                {
+                    RemoveDistortion(output, output, distMat, mtxMat);
+                }
+
+            });
+
         return outArray;
     }
 
