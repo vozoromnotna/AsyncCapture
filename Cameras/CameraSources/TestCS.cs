@@ -64,7 +64,25 @@ namespace AsyncCapture.Cameras.CameraSources
                 int x = Height / 2;
                 int y = Width / 2;
                 var channels = MatType.Channels;
-                var depth = MatType.Depth;
+
+                int depth;
+                if (MatType.Depth == 0 || MatType.Depth == 1)
+                {
+                    depth = 1;
+                }
+                else if (MatType.Depth == 2 || MatType == 3)
+                {
+                    depth = 2;
+                }
+                else if (MatType.Depth == 4 || MatType == 5)
+                {
+                    depth = 3;
+                }
+                else
+                {
+                    depth = 4;
+                }    
+
                 var maxIntensity = Math.Pow(2, (depth / channels) * 8) - 1;
                 double[,] imageData = new double[Height, Width];
 
