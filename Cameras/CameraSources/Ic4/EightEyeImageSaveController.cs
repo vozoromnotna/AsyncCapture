@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AsyncCapture.Utils;
+using System.IO;
 
 namespace AsyncCapture.Cameras.CameraSources.Ic4;
 
@@ -20,7 +21,7 @@ public class EightEyeImageSaverSink : ImageSaveSinkSource
 
     protected override string GetRecordDirectoryPath()
     {
-        return $"{_saveController.GetDirectory()}\\{_name}\\";
+        return Path.Combine(_saveController.GetDirectory(), _name);
     }
 
     protected override async Task SaveImage(Mat image, Dictionary<string, object> meta)
@@ -32,7 +33,7 @@ public class EightEyeImageSaverSink : ImageSaveSinkSource
 
     public override void Single()
     {
-        _directoryPath = $"{_saveController.GetDirectory()}\\{_name}";
+        _directoryPath = Path.Combine(_saveController.GetDirectory(),_name);
         System.IO.Directory.CreateDirectory(_directoryPath);
         _saveSingle = true;
     }
@@ -101,7 +102,8 @@ public class EightEyeImageSaveController : ImageSaveSinkSource
     {
         var time = Helper.GetStringTime();
 
-        string directoryPath = $"{_directoryPath}\\IMG_{_name}_{time}\\";
+        var directoryName = $"IMG_{_name}_{time}";
+        string directoryPath = Path.Combine(_directoryPath, directoryName);
 
         return directoryPath;
     }

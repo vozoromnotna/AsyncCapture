@@ -17,8 +17,9 @@ public class MatSavedEventArgs : EventArgs
 {
     public string Name { get; set; }
     public string DirectoryPath { get; set; }
-
     public bool IsSeries { get; set; }
+
+    public string Filename { get; set; }
 }
 
 public abstract class MatSaverSinkSourceBase : MatSource, ISinkSource<Mat>, ISaveSinkSource
@@ -68,9 +69,9 @@ public abstract class MatSaverSinkSourceBase : MatSource, ISinkSource<Mat>, ISav
         }
     }
 
-    protected void RiseMatSaved(string name, string directoryPath, bool isSeries)
+    protected void RiseMatSaved(string name, string directoryPath, bool isSeries, string filename = "")
     {
-        MatsSaved?.Invoke(this, new MatSavedEventArgs { Name = name, DirectoryPath = directoryPath, IsSeries = isSeries });
+        MatsSaved?.Invoke(this, new MatSavedEventArgs { Name = name, DirectoryPath = directoryPath, IsSeries = isSeries, Filename = filename });
     }
 
     protected abstract string GetRecordDirectoryPath();

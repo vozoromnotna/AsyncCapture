@@ -84,6 +84,8 @@ public sealed class ToupCS : CameraSource
             res = nncam.put_Option(eOPTION.OPTION_RGB, 4);
             res = nncam.put_Option(eOPTION.OPTION_BITDEPTH, 1);
 
+            nncam.put_VFlip(true);
+            nncam.put_HFlip(true);
 
             uint resnum = _nncam.ResolutionNumber;
             uint eSize = 0;
@@ -96,8 +98,7 @@ public sealed class ToupCS : CameraSource
                         throw new Exception("Failed to start camera");
                 }
             }
-            nncam.put_VFlip(false);
-            nncam.put_HFlip(true);
+            
 
             nncam.get_RawFormat(out uint nFourCC, out uint bitdepth);
         }

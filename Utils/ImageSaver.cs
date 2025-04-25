@@ -32,7 +32,7 @@ namespace AsyncCapture.Utils
 
         SaveFormat saveFormat;
 
-        private Action Save_smth;
+        private Func<string> Save_smth;
 
         public ImageSaver(ImageSource imageSource, string camName, string path = "", string time = "", SaveFormat saveFormat = SaveFormat.BMP)
         {
@@ -72,12 +72,12 @@ namespace AsyncCapture.Utils
 
         private string GetBaseName()
         {
-            string saveTime;
-            saveTime = ((this.time == "")||(this.time == null)) ? DateTime.Now.ToString("d_MM_yyyy_H_m_s_fff") : this.time;
+            var saveTime = (String.IsNullOrEmpty(time) ? DateTime.Now.ToString("d_MM_yyyy_H_m_s_fff") : time);
 
-            return $"{path}IMG_{camName}_{saveTime}";
+            var filename = $"IMG_{camName}_{saveTime}";
+            return Path.Combine(path, filename);
         }
-        private void SaveDrawingBMP()
+        private string SaveDrawingBMP()
         {
             string save_path = GetBaseName() + Helper.SaveFormatToString(saveFormat);
             switch (saveFormat)
@@ -96,10 +96,11 @@ namespace AsyncCapture.Utils
                     break;
 
             }
+            return save_path;
             
         }
 
-        private void SaveImageSource()
+        private string SaveImageSource()
         {
             string save_path = GetBaseName() + Helper.SaveFormatToString(saveFormat);
             using (var fileStream = new FileStream(save_path, FileMode.Create))
@@ -124,19 +125,27 @@ namespace AsyncCapture.Utils
                 encoder.Frames.Add(BitmapFrame.Create(imageSource as BitmapSource));
                 encoder.Save(fileStream);
             }
+            return save_path;
         }
 
-        private void SaveMat()
+        private string SaveMat()
         {
             string save_path = GetBaseName() + Helper.SaveFormatToString(saveFormat);
+            
+            if (!(mat.Type() == MatType.CV_8UC1 || mat.Type() != MatType.CV_8UC3))
+            {
+                Cv2.Normalize(mat, mat, 0, 255, NormTypes.MinMax);
+            }
+
             mat.SaveImage(save_path);
+            return save_path;
         }
-        public void Save()
+        public string Save()
         {
-            Save_smth();
+            return Save_smth();
         }
 
-        public Task SaveAsync()
+        public Task<string> SaveAsync()
         {
             return Task.Run(Save_smth);
         }

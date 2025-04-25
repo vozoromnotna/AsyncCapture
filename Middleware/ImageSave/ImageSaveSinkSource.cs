@@ -3,6 +3,7 @@ using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Printing;
 using System.Text;
@@ -33,10 +34,9 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
                 return;
             }
 
+            _saveSingle = false;
 
             await SaveImage(image, meta);
-
-            _saveSingle = false;
 
             base.RiseMatSaved(_name, _directoryPath, false);
 
@@ -50,6 +50,17 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
 
     public SaveFormat SaveFormat { get; set; } = SaveFormat.BMP;
 
+    object filenameLocker = new object();
+    private string _lastFilename;
+    public string LastFilename 
+    {
+        get => _lastFilename;
+        private set
+        {
+            _lastFilename = value;
+        }
+    }
+
     protected override async Task SaveImage(Mat image, Dictionary<string, object> meta)
     {
         string path = _recordDirectoryPath;
@@ -58,7 +69,8 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
             path = _directoryPath;
 
         var time = Helper.GetStringTime();
-        new ImageSaver(image.Clone(), camName: _name, path: path, saveFormat: SaveFormat, time: time).SaveAsync();
+        var filename = await new ImageSaver(image.Clone(), camName: _name, path: path, saveFormat: SaveFormat, time: time).SaveAsync();
+        LastFilename = filename;
     }
 
 
@@ -72,7 +84,8 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
     {
         var time = Helper.GetStringTime();
 
-        string directoryPath = $"{_directoryPath}\\SER_{_name}_{time}\\";
+        var directoryName = $"SER_{_name}_{time}";
+        string directoryPath = Path.Combine(_directoryPath, directoryName);
 
         return directoryPath;
     }

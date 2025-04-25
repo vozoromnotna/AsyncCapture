@@ -47,21 +47,22 @@ public class VideoSaveSinkSource : MatSaverSinkSourceBase
     }
 
     private Task _streamTask;
+
+    public string LastFilename { get; private set; }
     protected override void OnRecordStart()
     {
         _gstStream = new GStreamerSink();
 
-        var formattedPath = _directoryPath.Replace('\\', '/');
-
         var time = Helper.GetStringTime();
 
-        var filename = $"VID_{_name}_{time}{_fileformat}";
+        LastFilename = $"VID_{_name}_{time}{_fileformat}";
 
+        var fullPath = Path.Combine(_directoryPath, LastFilename).Replace('\\', '/');
 
         //mp4 h265 var pipelineDescription = $"videorate ! video/x-raw,framerate=30/1 ! videoconvert ! queue ! qsvh265enc ! h265parse ! mp4mux ! filesink location={formattedPath}{filename}";
         //mp4 h264 var pipelineDescription = $"videorate ! video/x-raw,framerate=30/1 ! videoconvert ! queue ! qsvh264enc ! mp4mux ! filesink location={formattedPath}{filename}";
 
-        var pipelineDescription = $"videorate ! video/x-raw,framerate=30/1 ! videoconvert ! queue ! avimux ! filesink location={formattedPath}{filename}";
+        var pipelineDescription = $"videorate ! video/x-raw,framerate=30/1 ! videoconvert ! queue ! avimux ! filesink location={fullPath}";
         _gstStream.CreatePipeline(pipelineDescription, VideoFormat.Bgr, (uint)_size.Value.Width, (uint)_size.Value.Height);
 
         _streamTask = _gstStream.StartStreamAsync();
