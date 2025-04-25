@@ -16,12 +16,12 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
         public UTC12LAutoCalibrationProp(UTC12LComAdapter comController)
         {
             _comController = comController;
-            Value = true;
+            Task.Delay(0).ContinueWith(t => Value = true);
         }
 
-        public override void SetValue(bool val)
+        public override async void SetValue(bool val)
         {
-            _comController.AutoCalibration(val);
+            await _comController.AutoCalibration(val);
         }
     }
 }

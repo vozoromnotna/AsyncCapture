@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,15 +23,15 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
             _minValue = 0;
             _maxValue = 255;
             _controller = controller;
-
-            Value = 128;
+            Task.Delay(0).ContinueWith((t) => Value = 128);
         }
 
         private int _valueToSet = 0;
         private bool _isBusy = false;
         private bool _isSet;
-        public override void SetValue(int val)
+        public override async void SetValue(int val)
         {
+
             if (_isBusy)
             {
                 _isSet = true;
@@ -41,17 +42,17 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
             if ((val < 0) || (val > 255))
                 return;
 
+            //Trace.WriteLine("BUSY TRUE");
             _isSet = false;
             _isBusy = true;
-            _controller.SetGain((byte)val).ContinueWith((x) =>
-            {
-                _isBusy = false;
-                if (_isSet)
-                {
-                    SetValue(_valueToSet);
-                }
+            await _controller.SetGain((byte)val);
 
-            });
+            //Trace.WriteLine("BUSY FALSE");
+            _isBusy = false;
+            if (_isSet)
+            {
+                SetValue(_valueToSet);
+            }
 
         }
     }
@@ -71,13 +72,13 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
             _maxValue = 255;
             _controller = controller;
 
-            Value = 128;
+            Task.Delay(0).ContinueWith(t => Value = 128);
         }
 
         private int _valueToSet = 0;
         private bool _isBusy = false;
         private bool _isSet;
-        public override void SetValue(int val)
+        public override async void SetValue(int val)
         {
             if (_isBusy)
             {
@@ -91,15 +92,15 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
 
             _isSet = false;
             _isBusy = true;
-            _controller.SetBrightness((byte)val).ContinueWith((x) =>
-            {
-                _isBusy = false;
-                if (_isSet)
-                {
-                    SetValue(_valueToSet);
-                }
 
-            });
+            await _controller.SetBrightness((byte)val);
+
+            _isBusy = false;
+            if (_isSet)
+            {
+                SetValue(_valueToSet);
+            }
+
             
         }
     }

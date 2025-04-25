@@ -16,12 +16,12 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
         public UTC12LTimeDomainFilterProp(UTC12LComAdapter comController)
         {
             _comController = comController;
-            Value = false;
+            Task.Delay(0).ContinueWith(t => Value = false);
         }
 
-        public override void SetValue(bool val)
+        public override async void SetValue(bool val)
         {
-            _comController.TimeDomainFilter(val);
+            await _comController.TimeDomainFilter(val);
         }
     }
 }

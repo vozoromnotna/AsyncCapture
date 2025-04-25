@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Nito.AsyncEx;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,12 +17,12 @@ namespace AsyncCapture.Cameras.CameraProperties.UTC12LProperties
         public UTC12LWhiteHotProp(UTC12LComAdapter comController)
         {
             _comController = comController;
-            Value = true;
+            Task.Delay(0).ContinueWith(t => Value = true);
         }
 
-        public override void SetValue(bool val)
+        public override async void SetValue(bool val)
         {
-            _comController.WhiteHot(!_value);
+            await _comController.WhiteHot(!_value);
         }
     }
 }
