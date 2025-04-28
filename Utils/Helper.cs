@@ -167,5 +167,96 @@ namespace AsyncCapture.Utils
             source.ToMat(result);
             return result;
         }
+
+        private unsafe delegate void ReadDelegate(byte* ptr, int rows, int cols, double[,] result);
+        public static double[,] MatToDouble(Mat image)
+        {
+            int rows = image.Rows;
+            int cols = image.Cols;
+
+            double[,] result = new double[rows, cols];
+
+            unsafe
+            {
+                ReadDelegate read = null;
+                if (image.Type() == MatType.CV_8UC1)
+                {
+                    read = ReadUint8;
+                }
+                else if (image.Type() == MatType.CV_16UC1)
+                {
+                    read = ReadUint16;
+                }
+                else if (image.Type() == MatType.CV_32FC1)
+                {
+                    read = ReadFloat;
+                }
+                else if (image.Type() == MatType.CV_64FC1)
+                {
+                    read = ReadDouble;
+                }
+                byte* ptr = (byte*)image.Data.ToPointer();
+                read(ptr, rows, cols, result);
+
+            }
+
+
+
+            return result;
+        }
+
+        unsafe private static void ReadUint16(byte* ptr, int rows, int cols, double[,] result)
+        {
+            ushort* ushortPtr = (ushort*)ptr;
+
+            Parallel.For(0, rows, i =>
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    int index = i * cols + j;
+                    result[i, j] = ushortPtr[index];
+                }
+            });
+        }
+
+        unsafe private static void ReadUint8(byte* ptr, int rows, int cols, double[,] result)
+        {
+            Parallel.For(0, rows, (i) =>
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    int index = i * cols + j;
+                    result[i, j] = ptr[index];
+                }
+            });
+        }
+
+        unsafe private static void ReadFloat(byte* ptr, int rows, int cols, double[,] result)
+        {
+            float* floatPtr = (float*)ptr;
+
+            Parallel.For(0, rows, i =>
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    int index = i * cols + j;
+                    result[i, j] = floatPtr[index];
+                }
+            });
+        }
+
+        unsafe private static void ReadDouble(byte* ptr, int rows, int cols, double[,] result)
+        {
+            double* doublePtr = (double*)ptr;
+
+            Parallel.For(0, rows, i =>
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    int index = i * cols + j;
+                    result[i, j] = doublePtr[index];
+                }
+            });
+        }
     }
 }

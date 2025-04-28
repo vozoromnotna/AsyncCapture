@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AsyncCapture.Cameras.CameraSources.Ic4;
 
-public record CalibData(Array Pos, List<Mat> Vin, List<Mat> Dist, List<Mat> Mtx, Array Wave);
+public record CalibData(Array Pos, List<Mat> Vin, List<Mat> Dist, List<Mat> Mtx, Array Wave, List<Mat> Affine);
 public class CalibDataReader
 {
     public CalibData ReadData(string fileName)
@@ -27,13 +27,15 @@ public class CalibDataReader
         (_, var dist) = Hdf5.ReadDataset<double>(fileId, "/dist/dist");// [8, 1, 5]
         (_, var mtx) = Hdf5.ReadDataset<double>(fileId, "/dist/mtx");// [8, 3, 3]
         (_, var wave) = Hdf5.ReadDataset<double>(fileId, "/wave");
+        (_, var affine) = Hdf5.ReadDataset<double>(fileId, "/affine"); // [8, 3, 2]
 
         var vinList =
             readArrayData(vin, (x) => 1.0 / x);
         var distList = readArrayData(dist);
         var mtxList = readArrayData(mtx);
- 
-        return new CalibData(pos, vinList, distList, mtxList, wave);
+        var affineList = readArrayData(affine);
+
+        return new CalibData(pos, vinList, distList, mtxList, wave, affineList);
     }
 
     double[] getSubArray(Array array, int index, Func<double, double> func)
@@ -44,7 +46,7 @@ public class CalibDataReader
         {
             for (int j = 0; j < array.GetLength(2); j++)
             {
-                var val = (double)array.GetValue(0, i, j);
+                var val = (double)array.GetValue(index, i, j);
                 if (func == null)
                     returnArray[j + i * array.GetLength(2)] = val;
                 else

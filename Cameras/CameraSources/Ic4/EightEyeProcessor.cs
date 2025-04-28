@@ -1,4 +1,5 @@
 ﻿using AsyncCapture;
+using AsyncCapture.Utils;
 using HDF5CSharp;
 using OpenCvSharp;
 using System;
@@ -59,7 +60,7 @@ public class EightEyeProcessor : ISink<Mat>
         var mtxList = _calibData.Mtx;
         var pos = _calibData.Pos;
         var inputSize = input.Size();
-
+        var affineList = _calibData.Affine;
         var outArray = new Mat[8]; 
 
         //for (int i = 0; i < vinList.Count; i++)
@@ -74,6 +75,9 @@ public class EightEyeProcessor : ISink<Mat>
 
 
                 var rect = new OpenCvSharp.Rect((int)pos.GetValue(i, 0), (int)pos.GetValue(i, 1), (int)pos.GetValue(i, 2), (int)pos.GetValue(i, 3));
+
+
+
                 outArray[i] = new Mat(input, rect);
                 var output = outArray[i];
 
@@ -85,6 +89,13 @@ public class EightEyeProcessor : ISink<Mat>
                 if (_distortion)
                 {
                     RemoveDistortion(output, output, distMat, mtxMat);
+                }
+
+                if (affineList.Count() > 0)
+                {
+                    var affineMat = affineList[i];
+                    var aff = Helper.MatToDouble(affineMat);
+                    Cv2.WarpAffine(output, output, affineMat.T(), output.Size());
                 }
 
             });
