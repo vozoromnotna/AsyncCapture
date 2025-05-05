@@ -30,10 +30,24 @@ public class EightEyeProcessor : ISink<Mat>
     }
 
     private int[] _wavelengths;
+    private OpenCvSharp.Rect[] _rects;
     public EightEyeProcessor(CalibData calibData)
     {
         _calibData = calibData;
+
+
+        PreReadCalib();
         _wavelengths = GetOrderedWavelengths();
+    }
+
+    private void PreReadCalib()
+    {
+        var pos = _calibData.Pos;
+        _rects = new Rect[pos.GetLength(0)];
+        for (int i = 0; i < _rects.Length; i++)
+        {
+            _rects[i] = new OpenCvSharp.Rect((int)pos.GetValue(i, 0), (int)pos.GetValue(i, 1), (int)pos.GetValue(i, 2), (int)pos.GetValue(i, 3));
+        }
     }
 
     private CalibData? _calibData;
@@ -74,12 +88,15 @@ public class EightEyeProcessor : ISink<Mat>
                 var mtxMat = mtxList[i];
 
 
-                var rect = new OpenCvSharp.Rect((int)pos.GetValue(i, 0), (int)pos.GetValue(i, 1), (int)pos.GetValue(i, 2), (int)pos.GetValue(i, 3));
-
+                var rect = _rects[i];
 
 
                 outArray[i] = new Mat(input, rect);
+
+                
                 var output = outArray[i];
+
+                Cv2.Resize(output, output, _rects[0].Size, interpolation: InterpolationFlags.Cubic);
 
                 if (_vignetting)
                 {
@@ -91,12 +108,12 @@ public class EightEyeProcessor : ISink<Mat>
                     RemoveDistortion(output, output, distMat, mtxMat);
                 }
 
-                if (affineList.Count() > 0)
-                {
-                    var affineMat = affineList[i];
-                    var aff = Helper.MatToDouble(affineMat);
-                    Cv2.WarpAffine(output, output, affineMat.T(), output.Size());
-                }
+                //if (affineList.Count() > 0)
+                //{
+                //    var affineMat = affineList[i];
+                //    var aff = Helper.MatToDouble(affineMat);
+                //    Cv2.WarpAffine(output, output, affineMat.T(), output.Size());
+                //}
 
             });
 
