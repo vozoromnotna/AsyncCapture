@@ -34,6 +34,8 @@ public class EightEyeConcatenator : MatSource
 
     private Mat[] _imageBuffer = new Mat[MaxImages];
 
+    private int[] _imageMap = new int[MaxImages];
+
     private Dictionary<ISource<Mat>, int> _channelIndexPairs = new Dictionary<ISource<Mat>, int>();
 
     private int _imageGetted = 0;
@@ -43,6 +45,16 @@ public class EightEyeConcatenator : MatSource
     public EightEyeConcatenator(int channels = MaxImages)
     {
         _tcs = new TaskCompletionSource();
+        for (int i = 0; i < MaxImages; i++)
+        {
+            _imageMap[i] = i;
+        }
+    }
+
+    
+    public void SetMap(int[] map)
+    {
+        _imageMap = map;
     }
 
     public void SetChannel(EightEyeChannel channel, int index)
@@ -98,8 +110,16 @@ public class EightEyeConcatenator : MatSource
         var output = new Mat();
         var upper = new Mat();
         var lower = new Mat();
-        Cv2.HConcat(mats.Take(MaxImages / 2), upper);
-        Cv2.HConcat(mats.Skip(MaxImages / 2), lower);
+
+        Mat[] reorderedMat = new Mat[mats.Length];
+        for (int i = 0; i < reorderedMat.Length; i++)
+        {
+            var index = _imageMap[i];
+            reorderedMat[i] = mats[index];
+        }
+
+        Cv2.HConcat(reorderedMat.Take(MaxImages / 2), upper);
+        Cv2.HConcat(reorderedMat.Skip(MaxImages / 2), lower);
         Cv2.VConcat(new List<Mat> { upper, lower }, output);
         return output;
     }
