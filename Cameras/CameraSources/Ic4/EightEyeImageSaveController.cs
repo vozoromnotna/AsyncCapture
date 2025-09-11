@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AsyncCapture.Utils;
 using System.IO;
+using Nito.AsyncEx;
 
 namespace AsyncCapture.Cameras.CameraSources.Ic4;
 
@@ -35,7 +36,10 @@ public class EightEyeImageSaverSink : ImageSaveSinkSource
     {
         _directoryPath = Path.Combine(_saveController.GetDirectory(),_name);
         System.IO.Directory.CreateDirectory(_directoryPath);
-        _saveSingle = true;
+        lock (_bufferLock)
+        {
+            AsyncContext.Run(()=>SaveImage(_bufferMat, _bufferMeta));
+        }
     }
 }
 public class EightEyeImageSaveController : ImageSaveSinkSource

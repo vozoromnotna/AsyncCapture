@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Xml.Linq;
+using Nito.AsyncEx;
 
 namespace AsyncCapture.Middleware.ImageSave;
 
@@ -24,22 +25,26 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
     protected bool _saveSingle = false;
 
     private int _counter = 0;
+    protected Mat _bufferMat;
+    protected Dictionary<string, object> _bufferMeta;
+    protected object _bufferLock = new object();
     public override async Task PutImage(Mat image, Dictionary<string, object> meta)
     {
-        if (!_isSave)
+        lock (_bufferLock)
         {
-            if (!_saveSingle)
+            if (_bufferMat != null && !_bufferMat.Empty())
             {
-                await imageGetted(image, meta);
-                return;
+                _bufferMat.Dispose();
             }
+            _bufferMat = image.Clone();
+            _bufferMeta = meta;
+        }
 
-            _saveSingle = false;
-
+        
+        if (_isSave)
+        {
             await SaveImage(image, meta);
-
             base.RiseMatSaved(_name, _directoryPath, false);
-
             return;
 
         }
@@ -77,7 +82,12 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
     public virtual void Single()
     {
         System.IO.Directory.CreateDirectory(_directoryPath);
-        _saveSingle = true;
+        _recordDirectoryPath = _directoryPath;
+        lock (_bufferLock)
+        {
+            AsyncContext.Run(()=>SaveImage(_bufferMat, _bufferMeta));
+        }
+
     }
 
     protected override string GetRecordDirectoryPath()
