@@ -23,10 +23,13 @@ public class Ic4ExposureController : INotifyPropertyChanged
 
     public bool IsAuto
     {
-        get => _autoExpProp.Value == "Continuous";
+        get => _autoExpProp?.Value == "Continuous";
         set
         {
-            _autoExpProp.Value = value ? "Continuous" : "Off";
+            if (_autoExpProp != null)
+            {
+                _autoExpProp.Value = value ? "Continuous" : "Off";
+            }
             OnPropertyChanged();
         }
     }

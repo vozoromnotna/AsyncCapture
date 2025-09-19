@@ -62,13 +62,22 @@ public sealed class Ic4CS : CameraSource
 
     void initTrigger()
     {
-        var triggerS = _grabber.DevicePropertyMap.Find(PropId.TriggerSource);
-        var triggerM = _grabber.DevicePropertyMap.Find(PropId.TriggerMode);
+        _grabber.DevicePropertyMap.TryFind(PropId.TriggerSource, out var triggerS);
+         _grabber.DevicePropertyMap.TryFind(PropId.TriggerMode, out var triggerM);
 
-        triggerM.Value = "Off";
-        triggerS.Value = "Any";
+         if (triggerS != null)
+         {
+             triggerS.Value = "Any";
+         }
 
-        _trigger = _grabber.DevicePropertyMap.Find(PropId.TriggerSoftware);
+         if (triggerM != null)
+         {
+             triggerM.Value = "Off";
+         }
+        
+        
+
+        _grabber.DevicePropertyMap.TryFind(PropId.TriggerSoftware, out _trigger);
     }
 
     void initImageSizeProp()
@@ -97,11 +106,16 @@ public sealed class Ic4CS : CameraSource
 
     void initExposureProp()
     {
-        var expProp = _grabber.DevicePropertyMap.Find(PropId.ExposureTime);
-        var autoExpProp = _grabber.DevicePropertyMap.Find(PropId.ExposureAuto);
+        _grabber.DevicePropertyMap.TryFind(PropId.ExposureTime, out var expProp);
+        _grabber.DevicePropertyMap.TryFind(PropId.ExposureAuto, out var autoExpProp);
+        
+        if (expProp == null && autoExpProp == null)
+            return;
+        
         Ic4ExposureController exposureController = new(autoExpProp, expProp);
 
-        Properties.Add(new Ic4ExposureAutoProp(exposureController));
+        if (autoExpProp != null) Properties.Add(new Ic4ExposureAutoProp(exposureController));
+        
         Properties.Add(new Ic4ExposureTimeProp(exposureController));
 
 
@@ -113,14 +127,19 @@ public sealed class Ic4CS : CameraSource
 
     void initGainProp()
     {
-        var gainAuto = (PropEnumeration)_grabber.DevicePropertyMap.Find("GainAuto");
-        var gain = (PropFloat)_grabber.DevicePropertyMap.Find("Gain");
+        _grabber.DevicePropertyMap.TryFind(PropId.GainAuto, out var gainAuto);
+        _grabber.DevicePropertyMap.TryFind(PropId.Gain, out var gain);
 
-        gainAuto.Value = "Off";
+        if (gainAuto == null && gain == null)
+            return;
         
         Ic4GainController gainController = new(gainAuto, gain);
+        if (gainAuto != null)
+        {
+            gainAuto.Value = "Off";
+            Properties.Add(new Ic4GainAutoProp(gainController));
+        }
 
-        Properties.Add(new Ic4GainAutoProp(gainController));
         Properties.Add(new Ic4GainProp(gainController));
     }
 

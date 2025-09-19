@@ -23,10 +23,13 @@ public class Ic4GainController : INotifyPropertyChanged
 
     public bool IsAuto
     {
-        get => _autoGainProp.Value == "Continuous";
+        get => _autoGainProp?.Value == "Continuous";
         set
         {
-            _autoGainProp.Value = value ? "Continuous" : "Off";
+            if (_autoGainProp != null)
+            {
+                _autoGainProp.Value = value ? "Continuous" : "Off";
+            }
             OnPropertyChanged();
         }
     }
