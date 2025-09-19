@@ -4,11 +4,7 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Authors>vozoromnotna</Authors>
         <Description>the imaging source extension of AsyncCapture library</Description>
-        <PackageProjectUrl>https://github.com/vozoromnotna/AsyncCapture</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/vozoromnotna/AsyncCapture</RepositoryUrl>
-        <Version>2.0.1</Version>
     </PropertyGroup>
 
     <ItemGroup>

@@ -6,9 +6,6 @@
         <Nullable>enable</Nullable>
         <Authors>vozoromnotna</Authors>
         <Description>iray extension of AsyncCapture library</Description>
-        <PackageProjectUrl>https://github.com/vozoromnotna/AsyncCapture</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/vozoromnotna/AsyncCapture</RepositoryUrl>
-        <Version>2.0.1</Version>
     </PropertyGroup>
 
     <ItemGroup>

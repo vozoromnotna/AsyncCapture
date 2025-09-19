@@ -3,11 +3,9 @@
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <PackageId>AsyncCapture.Core</PackageId>
-    <Version>2.0.1</Version>
     <Authors>vozoromnotna</Authors>
     <Company>STC UI RAS</Company>
     <Description>A universal library for working with cameras </Description>
-    <RepositoryUrl>https://github.com/vozoromnotna/AsyncCapture</RepositoryUrl>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
