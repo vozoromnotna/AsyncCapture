@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using AsyncCapture.Core.Cameras.CameraProperties;
 using AsyncCapture.Core.Cameras.Filters;
+using AsyncCapture.Core.Cameras.Records;
 using MathNet.Numerics;
 using MathNet.Numerics.Interpolation;
 using OpenCvSharp;
@@ -327,6 +328,11 @@ public class HistProperty : ButtonProperty
     HistFilter _filter;
     public override string Name => "Histogram";
     public override string DisplayName => "Гистограмма";
+    public override void SetByPropertyRecord(PropertyRecord record)
+    {
+        throw new NotImplementedException();
+    }
+
     public HistProperty(HistFilter filter)
     {
         _filter = filter;
@@ -375,6 +381,10 @@ public class HistAutoProperty : BoolProperty
 public class HistThresholdLowProperty : DoubleProperty
 {
     HistFilter _filter;
+    private double _minValue;
+    private double _maxValue;
+    public override double MinValue { get => _minValue; }
+    public override double MaxValue { get => _maxValue; }
     public HistThresholdLowProperty(HistFilter filter)
     {
         _filter = filter;
@@ -401,6 +411,10 @@ public class HistThresholdLowProperty : DoubleProperty
 public class HistThresholdHighProperty : DoubleProperty
 {
     HistFilter _filter;
+    private double _minValue;
+    private double _maxValue;
+    public override double MinValue { get => _minValue; }
+    public override double MaxValue { get => _maxValue; }
     public HistThresholdHighProperty(HistFilter filter)
     {
         _filter = filter;

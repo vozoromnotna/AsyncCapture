@@ -1,7 +1,6 @@
 ﻿using AsyncCapture.Core.Cameras.CameraProperties;
-using AsyncCapture.Iray.Properties;
 
-namespace AsyncCapture.Wpf.Iray;
+namespace AsyncCapture.Iray.Properties;
 
 public class IrayAutoFocus : ButtonProperty
 {

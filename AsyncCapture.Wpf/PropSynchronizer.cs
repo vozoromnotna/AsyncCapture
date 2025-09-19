@@ -4,6 +4,11 @@ namespace AsyncCapture.Wpf;
 
 public class PropSynchronizer : DoubleProperty
 {
+    
+    private double _minValue;
+    private double _maxValue;
+    public override double MinValue { get => _minValue; }
+    public override double MaxValue { get => _maxValue; }
     private string _name;
     public override string Name => _name;
 
@@ -179,6 +184,9 @@ public class PelcoPropSynchronizer : PelcoButtonProperty
     {
         get => _propList.Count;
     }
+
+    public override string MinValue { get; }
+    public override string MaxValue { get; }
 }
 
 

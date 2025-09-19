@@ -84,7 +84,7 @@ namespace AsyncCapture.Iray.Properties
         public IrayImageModeProp(IrayGainControl gainControl)
         {
             _gainControl = gainControl;
-            values = new System.Collections.ObjectModel.ObservableCollection<string>
+            _values = new System.Collections.ObjectModel.ObservableCollection<string>
             {
                 "Ручной",
                 "Авто 0",
@@ -92,12 +92,12 @@ namespace AsyncCapture.Iray.Properties
             };
 
             AsyncContext.Run(async ()=> await _gainControl.SetImageMode(IrayImageMode.Auto0));
-            selectedIndex = 1;
+            _selectedIndex = 1;
         }
 
         protected override async void SelectedItemChanged()
         {
-            var res = await _gainControl.SetImageMode((IrayImageMode)selectedIndex);
+            var res = await _gainControl.SetImageMode((IrayImageMode)_selectedIndex);
 
         }
     }
@@ -124,6 +124,10 @@ namespace AsyncCapture.Iray.Properties
             _gainControl.ImageModeChanged += (sender, e) => { IsEnabled = _gainControl.ImageMode == IrayImageMode.Manual; };
         }
 
+        private int _minValue;
+        private int _maxValue;
+        public override int MinValue { get => _minValue; }
+        public override int MaxValue { get => _maxValue; }
         public override void SetValue(int val)
         {
             if (val < _minValue)
@@ -143,6 +147,11 @@ namespace AsyncCapture.Iray.Properties
     public class IrayBrightnessProp : IntProperty
     {
         public override int MinIncrement => 1;
+        
+        private int _minValue;
+        private int _maxValue;
+        public override int MinValue { get => _minValue; }
+        public override int MaxValue { get => _maxValue; }
 
         public override string Name => "Iray_Brightness";
 

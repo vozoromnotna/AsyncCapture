@@ -59,7 +59,7 @@ abstract public class CameraSource : MatSource, INotifyPropertyChanged, IPropert
         var camRecord = new List<PropertyRecord>();
         foreach (var property in _properties)
         {
-            var propToRecord = property.GetPropertyRecord(Name);
+            var propToRecord = property.GetPropertyRecord();
             if (propToRecord != null)
                 camRecord.Add(propToRecord);
         }

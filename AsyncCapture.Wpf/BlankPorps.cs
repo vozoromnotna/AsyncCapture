@@ -4,6 +4,11 @@ namespace AsyncCapture.Wpf;
 
 public class ExpBlank : DoubleProperty
 {
+    private double _minValue;
+    private double _maxValue;
+    public override double MinValue { get => _minValue; }
+    public override double MaxValue { get => _maxValue; }
+    
     private AutoExpBlank auto_exp;
     public override bool IsEnabled { get { return !auto_exp.Value; }  }
 
@@ -26,6 +31,10 @@ public class ExpBlank : DoubleProperty
 
 public class GainBlank : DoubleProperty
 {
+    private double _minValue;
+    private double _maxValue;
+    public override double MinValue { get => _minValue; }
+    public override double MaxValue { get => _maxValue; }
     public GainBlank()
     {
         _value = 20;
@@ -42,6 +51,10 @@ public class GainBlank : DoubleProperty
 
 public class IntBlank : IntProperty
 {
+    private int _minValue;
+    private int _maxValue;
+    public override int MinValue { get => _minValue; }
+    public override int MaxValue { get => _maxValue; }
     public IntBlank()
     {
         _value = 10;
@@ -57,6 +70,10 @@ public class IntBlank : IntProperty
 
 public class DoubleBlank : DoubleProperty
 {
+    private double _minValue;
+    private double _maxValue;
+    public override double MinValue { get => _minValue; }
+    public override double MaxValue { get => _maxValue; }
     public DoubleBlank()
     {
         _value = 30;
@@ -93,8 +110,8 @@ public class ImgFormatBlank : ListProperty
 {
     public ImgFormatBlank() : base()
     {
-        values.Add("RGB");
-        values.Add("Gray");
+        _values.Add("RGB");
+        _values.Add("Gray");
         SelectedIndex = 0;
     }
 
@@ -208,4 +225,7 @@ public class DoubleToPecloWrapper : PelcoButtonProperty
         _property.Value = _virtualMin;
         IsMinusEnabled = false;
     }
+
+    public override string MinValue { get; }
+    public override string MaxValue { get; }
 }

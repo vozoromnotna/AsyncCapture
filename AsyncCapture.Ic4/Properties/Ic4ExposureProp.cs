@@ -55,6 +55,10 @@ public class Ic4ExposureTimeProp : DoubleProperty
 {
     public override double MinIncrement => _exposureController.ExposureTimeIncrement * (_isMilliseconds ? 0.001 : 1);
 
+    private double _minValue;
+    private double _maxValue;
+    public override double MinValue { get => _minValue; }
+    public override double MaxValue { get => _maxValue; }
     public override string Name => "Exposure_Time";
 
     private bool _isMilliseconds = false;
@@ -86,7 +90,6 @@ public class Ic4ExposureTimeProp : DoubleProperty
     private CancellationTokenSource _exposureUpdateCts;
     public Ic4ExposureTimeProp(Ic4ExposureController exposureController)
     {
-        _isLogarithmic = true;
         _exposureController = exposureController;
         _exposureController.PropertyChanged += (e, sender) => 
         { 
@@ -132,6 +135,9 @@ public class Ic4ExposureTimeProp : DoubleProperty
             expTime *= 0.001;
         return expTime;
     }
+
+
+
     public override void SetValue(double val)
     {
         var expTime = val;
@@ -158,6 +164,9 @@ public class Ic4ExposureAutoProp : BoolProperty
     {
         return _exposureController.IsAuto;
     }
+
+
+
     public override void SetValue(bool val)
     {
         _exposureController.IsAuto = val;

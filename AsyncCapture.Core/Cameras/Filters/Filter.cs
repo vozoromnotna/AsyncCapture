@@ -82,7 +82,7 @@ public abstract class Filter : INotifyPropertyChanged, IPropertyContainer
         records.Add(new PropertyRecord { Name = $"{this.Name}_IsOn", Value = this.IsOn.ToString() }); 
         foreach (var prop in properties)
         {
-            records.Add(prop.GetPropertyRecord(Name));
+            records.Add(prop.GetPropertyRecord());
         }
         return records;
     }

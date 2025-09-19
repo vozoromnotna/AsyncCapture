@@ -4,25 +4,21 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using AsyncCapture.Core.Cameras.Records;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace AsyncCapture.Core.Cameras.CameraProperties;
 
-public abstract class PropertyBase : INotifyPropertyChanged
+public abstract partial class PropertyBase : ObservableObject
 {
     public abstract string Name { get; }
 
     public abstract string DisplayName { get; }
 
-    public virtual PropertyRecord GetPropertyRecord(string ownerName)
+    public virtual PropertyRecord GetPropertyRecord()
     {
         return new PropertyRecord { Name = this.Name, Value = "" };
-        //return new PropertyRecord { Name = $"{ownerName}_{this.Name}", Value = ""};
     }
-
-    public virtual void SetByPropertyRecord(PropertyRecord record)
-    {
-
-    }
+    public abstract void SetByPropertyRecord(PropertyRecord record);
 
     protected bool _isEnabled = true;
     virtual public bool IsEnabled 
@@ -37,51 +33,31 @@ public abstract class PropertyBase : INotifyPropertyChanged
 
     public virtual void Update() { }
 
-    public event PropertyChangedEventHandler PropertyChanged;
-    public void OnPropertyChanged([CallerMemberName] string prop = "")
+    public override string ToString()
     {
-        if (PropertyChanged != null)
-            PropertyChanged(this, new PropertyChangedEventArgs(prop));
-    }
-
-    public virtual string GetStringValue()
-    {
-        return "GetStringValue undefined";
+        return "ToString undefined";
     }
 }
 public abstract class Property<T> : PropertyBase
 {
-    protected T _minValue;
-
-    protected T _maxValue;
-
+    public abstract T MinValue { get; }
+    public abstract T MaxValue { get; }
     
-
-    public T MinValue { get { return _minValue; } }
-    public T MaxValue { get { return _maxValue; } }
-
-    protected bool _isLogarithmic;
-    public bool IsLogarithmic { get => _isLogarithmic; }
-
     protected T _value;
 
     protected bool _suppressNotifications = false;
     public T Value
     {
-        get
-        {
-            var ret_value = GetValue();
-            return ret_value;
-        }
+        get => GetValue();
         set
         {
-            if (!_isEnabled) 
+            if (!IsEnabled) 
                 return;
 
             if (_suppressNotifications)
                 return;
 
-            this._value = value;
+            _value = value;
             SetValue(value);
             OnPropertyChanged();
         }
@@ -96,7 +72,7 @@ public abstract class Property<T> : PropertyBase
         return _value;
     }
 
-    public override PropertyRecord GetPropertyRecord(string ownerName)
+    public override PropertyRecord GetPropertyRecord()
     {
         return new PropertyRecord { Name = this.Name, Value = this.Value.ToString() };
     }
@@ -120,7 +96,7 @@ public abstract class Property<T> : PropertyBase
         //IsEnabled = oldEnabled;
     }
 
-    public override string GetStringValue()
+    public override string ToString()
     {
         return Value.ToString();
     }
@@ -134,19 +110,19 @@ interface IIncremented<T>
 
 public abstract class DoubleProperty : Property<double>, IIncremented<double>
 {
-    protected double increment;
+    protected double _increment;
     public double Increment
     {
-        get => increment;
+        get => _increment;
         set
         {
             if (value < MinIncrement)
             {
-                increment = MinIncrement;
+                _increment = MinIncrement;
             }
             else
             {
-                increment = value;
+                _increment = value;
             }
             OnPropertyChanged();
         }
@@ -159,25 +135,26 @@ public abstract class DoubleProperty : Property<double>, IIncremented<double>
 
 public abstract class BoolProperty : Property<bool>
 {
-
+    public override bool MinValue { get => false; }
+    public override bool MaxValue { get => true; }
 }
 
-public abstract class uIntProperty : Property<uint>, IIncremented<uint>
+public abstract class UintProperty : Property<uint>, IIncremented<uint>
 {
-    protected uint increment;
+    protected uint _increment;
     public uint Increment 
     { 
-        get => increment;
+        get => _increment;
         set
         {
             if (value < MinIncrement)
             {
-                increment = MinIncrement;
+                _increment = MinIncrement;
 
             }
             else
             {
-                increment = value;
+                _increment = value;
             }
             OnPropertyChanged();
         }
@@ -189,20 +166,20 @@ public abstract class uIntProperty : Property<uint>, IIncremented<uint>
 
 public abstract class IntProperty : Property<int>, IIncremented<int>
 {
-    protected int increment;
+    protected int _increment;
     public int Increment
     {
-        get => increment;
+        get => _increment;
         set
         {
             if (value < MinIncrement)
             {
-                increment = MinIncrement;
+                _increment = MinIncrement;
 
             }
             else
             {
-                increment = value;
+                _increment = value;
             }
             OnPropertyChanged();
         }
@@ -218,7 +195,7 @@ public abstract class IntProperty : Property<int>, IIncremented<int>
 public abstract class ListProperty : PropertyBase
 {
 
-    protected ObservableCollection<string> values;
+    protected ObservableCollection<string> _values;
     public ObservableCollection<string> Values
     {
         get
@@ -228,21 +205,21 @@ public abstract class ListProperty : PropertyBase
         }
         protected set
         {
-            values = value;
+            _values = value;
             OnPropertyChanged();
         }
     }
 
-    protected int selectedIndex;
+    protected int _selectedIndex;
     public int SelectedIndex
     {
         get
         {
-            return selectedIndex;
+            return _selectedIndex;
         }
         set
         {
-            selectedIndex = value;
+            _selectedIndex = value;
             SelectedItemChanged();
             OnPropertyChanged();
         }
@@ -252,28 +229,28 @@ public abstract class ListProperty : PropertyBase
 
     protected virtual ObservableCollection<string> GetValues()
     {
-        return values;
+        return _values;
     }
 
     public ListProperty()
     {
-        values = new ObservableCollection<string>();
+        _values = new ObservableCollection<string>();
     }
 
-    public override PropertyRecord GetPropertyRecord(string ownerName)
+    public override PropertyRecord GetPropertyRecord()
     {
-        return new PropertyRecord { Name = this.Name, Value = this.values[selectedIndex] };
+        return new PropertyRecord { Name = this.Name, Value = this._values[_selectedIndex] };
     }
 
     public override void SetByPropertyRecord(PropertyRecord record)
     {
-        var index = values.IndexOf(record.Value);
+        var index = _values.IndexOf(record.Value);
         SelectedIndex = index;
     }
 
-    public override string GetStringValue()
+    public override string ToString()
     {
-        return values[selectedIndex];
+        return _values[_selectedIndex];
     }
 }
 

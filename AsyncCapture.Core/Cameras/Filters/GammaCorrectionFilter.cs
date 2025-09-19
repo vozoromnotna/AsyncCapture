@@ -37,7 +37,7 @@ public sealed class GammaCorrectionFilter : Filter
 }
 public class GammaFilterProp : DoubleProperty
 {
-    GammaCorrectionFilter filter;
+    GammaCorrectionFilter _filter;
 
     public override string Name => "Gamma";
 
@@ -47,18 +47,19 @@ public class GammaFilterProp : DoubleProperty
 
     public GammaFilterProp(GammaCorrectionFilter filter)
     {
-        this.filter = filter;
-        this._maxValue = 2.2;
-        this._minValue = 1 / 2.2;
+        this._filter = filter;
     }
+
+    public override double MinValue { get => 1 / 2.2; }
+    public override double MaxValue { get => 2.2; }
 
     public override void SetValue(double val)
     {
-        filter.Gamma = val;
+        _filter.Gamma = val;
     }
 
     public override double GetValue()
     {
-        return filter.Gamma;
+        return _filter.Gamma;
     }
 }

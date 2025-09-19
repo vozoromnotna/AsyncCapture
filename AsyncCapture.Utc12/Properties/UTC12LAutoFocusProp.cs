@@ -1,6 +1,6 @@
-﻿using AsyncCapture.Utc12.Properties;
+﻿using AsyncCapture.Core.Cameras.CameraProperties;
 
-namespace AsyncCapture.Wpf.Utc12
+namespace AsyncCapture.Utc12.Properties
 {
     public class UTC12LAutoFocusProp : ButtonProperty
     {

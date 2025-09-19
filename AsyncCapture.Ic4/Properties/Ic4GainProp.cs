@@ -54,6 +54,11 @@ public class Ic4GainController : INotifyPropertyChanged
 public class Ic4GainProp : DoubleProperty
 {
     public override double MinIncrement => _gainController.GainIncrement;
+    
+    private double _minValue;
+    private double _maxValue;
+    public override double MinValue { get => _minValue; }
+    public override double MaxValue { get => _maxValue; }
 
     public override string Name => "Gain";
 

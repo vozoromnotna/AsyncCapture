@@ -8,7 +8,7 @@
         <Description>the imaging source extension of AsyncCapture library</Description>
         <PackageProjectUrl>https://github.com/vozoromnotna/AsyncCapture</PackageProjectUrl>
         <RepositoryUrl>https://github.com/vozoromnotna/AsyncCapture</RepositoryUrl>
-        <Version>2.0.0</Version>
+        <Version>2.0.1</Version>
     </PropertyGroup>
 
     <ItemGroup>

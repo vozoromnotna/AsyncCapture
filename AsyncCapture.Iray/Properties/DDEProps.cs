@@ -64,17 +64,17 @@ namespace AsyncCapture.Iray.Properties
         public IrayDDEModeProp(IrayGainControl gainControl)
         {
             _gainControl = gainControl;
-            values = new System.Collections.ObjectModel.ObservableCollection<string>();
+            _values = new System.Collections.ObjectModel.ObservableCollection<string>();
             for (int i = 0; i < 8; i++)
-                values.Add($"Mode {i}");
+                _values.Add($"Mode {i}");
 
             _gainControl.SetDDEMode(0);
-            selectedIndex = 0;
+            _selectedIndex = 0;
         }
 
         protected override void SelectedItemChanged()
         {
-            _gainControl.SetDDEMode((byte)selectedIndex);
+            _gainControl.SetDDEMode((byte)_selectedIndex);
         }
     }
 

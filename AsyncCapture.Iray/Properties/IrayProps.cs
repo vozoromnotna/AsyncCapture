@@ -10,6 +10,11 @@ public class IrayZoomProp : IntProperty
     public override string Name => "Zoom";
 
     public override string DisplayName => "Увеличение";
+    
+    private int _minValue;
+    private int _maxValue;
+    public override int MinValue { get => _minValue; }
+    public override int MaxValue { get => _maxValue; }
 
 
     public IrayZoomProp(IrayComAdapter comControl)
@@ -84,6 +89,11 @@ public class IrayZoomProp : IntProperty
 public class IrayFocusProp : IntProperty
 {
     public override int MinIncrement => 1;
+    
+    private int _minValue;
+    private int _maxValue;
+    public override int MinValue { get => _minValue; }
+    public override int MaxValue { get => _maxValue; }
 
     public override string Name => "Focus";
 
@@ -174,7 +184,7 @@ public class IrayPaletteProp : ListProperty
     public IrayPaletteProp(IrayComAdapter comControl)
     {
         _comControl = comControl;
-        values = new System.Collections.ObjectModel.ObservableCollection<string>
+        _values = new System.Collections.ObjectModel.ObservableCollection<string>
         {
             "Whitehot",
             "Blackhot",
@@ -228,17 +238,17 @@ public class IrayPaletteProp : ListProperty
         try
         {
             var curPalette = res[4];
-            selectedIndex = curPalette;
+            _selectedIndex = curPalette;
         }
         catch
         {
-            selectedIndex = 0;
+            _selectedIndex = 0;
         }
     }
 
     protected override async void SelectedItemChanged()
     {
-        var bytes = nameBytesPairs[values[SelectedIndex]];
+        var bytes = nameBytesPairs[_values[SelectedIndex]];
         var res = await _comControl.SendMessage(bytes);
         if (res[4] != 0x01)
             throw new Exception("ошибка в установке палитры");

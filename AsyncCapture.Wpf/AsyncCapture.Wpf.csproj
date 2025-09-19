@@ -9,7 +9,7 @@
         <Description>WPF extension of AsyncCapture library</Description>
         <PackageProjectUrl>https://github.com/vozoromnotna/AsyncCapture</PackageProjectUrl>
         <RepositoryUrl>https://github.com/vozoromnotna/AsyncCapture</RepositoryUrl>
-        <Version>2.0.0</Version>
+        <Version>2.0.1</Version>
     </PropertyGroup>
 
     <ItemGroup>
@@ -21,14 +21,11 @@
     <ItemGroup>
       <PackageReference Include="DirectShowLib" Version="1.0.0" />
       <PackageReference Include="Extended.Wpf.Toolkit" Version="5.0.0" />
-      <PackageReference Include="ic4dotnet" Version="1.4.0.3227-test" />
       <PackageReference Include="ScottPlot.WPF" Version="4.1.74" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\AsyncCapture.Core\AsyncCapture.Core.csproj" />
-      <ProjectReference Include="..\AsyncCapture.Iray\AsyncCapture.Iray.csproj" />
-      <ProjectReference Include="..\AsyncCapture.Utc12\AsyncCapture.Utc12.csproj" />
     </ItemGroup>
 
 </Project>

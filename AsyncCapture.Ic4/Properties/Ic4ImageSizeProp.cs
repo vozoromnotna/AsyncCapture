@@ -135,7 +135,13 @@ public class Ic4ImageSizeController : INotifyPropertyChanged
 
 public class Ic4HeightProp : IntProperty
 {
+    
     public override int MinIncrement => 1;
+    
+    private int _minValue;
+    private int _maxValue;
+    public override int MinValue { get => _minValue; }
+    public override int MaxValue { get => _maxValue; }
 
     public override string Name => "Image_heigth";
 
@@ -163,6 +169,10 @@ public class Ic4HeightProp : IntProperty
 public class Ic4WidthProp : IntProperty
 {
     public override int MinIncrement => 1;
+    private int _minValue;
+    private int _maxValue;
+    public override int MinValue { get => _minValue; }
+    public override int MaxValue { get => _maxValue; }
 
     public override string Name => "Image_width";
 
@@ -190,6 +200,11 @@ public class Ic4WidthProp : IntProperty
 public class Ic4BinningHorizontalProp : IntProperty
 {
     public override int MinIncrement => 1;
+    
+    private int _minValue;
+    private int _maxValue;
+    public override int MinValue { get => _minValue; }
+    public override int MaxValue { get => _maxValue; }
 
     public override string Name => "Image_width";
 
@@ -217,6 +232,10 @@ public class Ic4BinningHorizontalProp : IntProperty
 public class Ic4BinningVerticalProp : IntProperty
 {
     public override int MinIncrement => 1;
+    private int _minValue;
+    private int _maxValue;
+    public override int MinValue { get => _minValue; }
+    public override int MaxValue { get => _maxValue; }
 
     public override string Name => "Image_width";
 
@@ -250,4 +269,6 @@ public class Ic4ExposureProp : DoubleProperty
     public override string DisplayName => throw new NotImplementedException();
 
 
+    public override double MinValue { get; }
+    public override double MaxValue { get; }
 }

@@ -43,6 +43,11 @@ public sealed class ToupAutoExp : BoolProperty
 public sealed class ToupExp : DoubleProperty
 {
     private Tcam nncam;
+    
+    private double _minValue;
+    private double _maxValue;
+    public override double MinValue { get => _minValue; }
+    public override double MaxValue { get => _maxValue; }
     public override string Name => "Exposure";
 
     public override double MinIncrement => 1;
@@ -64,8 +69,7 @@ public sealed class ToupExp : DoubleProperty
         _minValue = (double)min;
         _maxValue = (double)max;
         _value = (double)value;
-
-        _isLogarithmic = true;
+        
     }
 
     public override double GetValue()
@@ -133,11 +137,11 @@ public class ToupFilterResolution : ListProperty
         {
             int w = 0, h = 0;
             if (nncam.get_Resolution(i, out w, out h))
-                values.Add(w.ToString() + "*" + h.ToString());
+                _values.Add(w.ToString() + "*" + h.ToString());
         }
         uint u_selectedIndex = 0;
         nncam.get_eSize(out u_selectedIndex);
-        selectedIndex = Convert.ToInt32(u_selectedIndex);
+        _selectedIndex = Convert.ToInt32(u_selectedIndex);
 
     }
 
@@ -149,7 +153,7 @@ public class ToupFilterResolution : ListProperty
     {
         nncam.Stop();
 
-        nncam.put_eSize(Convert.ToUInt32(selectedIndex));
+        nncam.put_eSize(Convert.ToUInt32(_selectedIndex));
 
         int width = 0, height = 0;
         nncam.get_Size(out width, out height);

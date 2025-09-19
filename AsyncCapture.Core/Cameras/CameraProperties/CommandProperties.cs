@@ -1,7 +1,7 @@
-﻿using AsyncCapture.Core.Cameras.CameraProperties;
-using AsyncCapture.Core.Cameras.Records;
+﻿using AsyncCapture.Core.Cameras.Records;
+using CommunityToolkit.Mvvm.Input;
 
-namespace AsyncCapture.Wpf;
+namespace AsyncCapture.Core.Cameras.CameraProperties;
 
 public abstract class ButtonProperty : PropertyBase
 {
@@ -10,17 +10,22 @@ public abstract class ButtonProperty : PropertyBase
     {
         get
         {
-            return buttonCommand ?? (buttonCommand = new RelayCommand(obj =>
+            return buttonCommand ?? (buttonCommand = new RelayCommand(() =>
             {
                 OnButtonClicked();
-            })); ;
+            }));
         }
     }
     abstract public void OnButtonClicked();
 
-    public override PropertyRecord GetPropertyRecord(string ownerName)
+    public override PropertyRecord GetPropertyRecord()
     {
         return null;
+    }
+
+    public override void SetByPropertyRecord(PropertyRecord record)
+    {
+        return;
     }
 }
 
@@ -32,7 +37,7 @@ public abstract class PelcoButtonProperty : ButtonPlusMinusProperty
     {
         get
         {
-            return setMinCommand ?? (setMinCommand = new RelayCommand(obj =>
+            return setMinCommand ?? (setMinCommand = new RelayCommand(() =>
             {
                 SetMin();
             }));
@@ -44,7 +49,7 @@ public abstract class PelcoButtonProperty : ButtonPlusMinusProperty
     {
         get
         {
-            return setMaxCommand ?? (setMaxCommand= new RelayCommand(obj =>
+            return setMaxCommand ?? (setMaxCommand= new RelayCommand(() =>
             {
                 SetMax();
                 
@@ -72,11 +77,15 @@ public abstract class PelcoButtonProperty : ButtonPlusMinusProperty
         IsEnabled = true;
         OnPropertyChanged("Value");
     }
-
+    
 }
 
 public abstract class ButtonPlusMinusProperty : Property<string>
 {
+    public override string MaxValue { get; }
+
+    public override string MinValue { get; }
+
     public ButtonPlusMinusProperty()
     {
         _value = "";
@@ -86,7 +95,7 @@ public abstract class ButtonPlusMinusProperty : Property<string>
     {
         get 
         {
-            return plusCommand ?? (plusCommand = new RelayCommand(obj =>
+            return plusCommand ?? (plusCommand = new RelayCommand(() =>
             {
                 PlusButton();
                 OnPropertyChanged("Value");
@@ -99,7 +108,7 @@ public abstract class ButtonPlusMinusProperty : Property<string>
     {
         get
         {
-            return minusCommand ?? (minusCommand = new RelayCommand(obj =>
+            return minusCommand ?? (minusCommand = new RelayCommand(() =>
             {
                 MinusButton();
                 OnPropertyChanged("Value");
@@ -113,7 +122,7 @@ public abstract class ButtonPlusMinusProperty : Property<string>
     {
         get
         {
-            return plusMouseDownCommand ?? (plusMouseDownCommand = new RelayCommand(obj => 
+            return plusMouseDownCommand ?? (plusMouseDownCommand = new RelayCommand(() => 
             {
                 PlusMouseDown();
                 OnPropertyChanged("Value");
@@ -127,7 +136,7 @@ public abstract class ButtonPlusMinusProperty : Property<string>
     {
         get
         {
-            return plusMouseUpCommand ?? (plusMouseUpCommand = new RelayCommand(obj =>
+            return plusMouseUpCommand ?? (plusMouseUpCommand = new RelayCommand(() =>
             {
                 PlusMouseUp();
                 OnPropertyChanged("Value");
@@ -141,7 +150,7 @@ public abstract class ButtonPlusMinusProperty : Property<string>
     {
         get
         {
-            return minusMouseDownCommand ?? (minusMouseDownCommand = new RelayCommand(obj =>
+            return minusMouseDownCommand ?? (minusMouseDownCommand = new RelayCommand(() =>
             {
                 MinusMouseDown();
                 OnPropertyChanged("Value");
@@ -155,7 +164,7 @@ public abstract class ButtonPlusMinusProperty : Property<string>
     {
         get
         {
-            return minusMouseUpCommand ?? (minusMouseUpCommand = new RelayCommand(obj =>
+            return minusMouseUpCommand ?? (minusMouseUpCommand = new RelayCommand(() =>
             {
                 MinusMouseUp();
                 OnPropertyChanged("Value");
@@ -214,9 +223,13 @@ public abstract class ButtonPlusMinusProperty : Property<string>
 
     }
 
-    public override PropertyRecord GetPropertyRecord(string ownerName)
+    public override PropertyRecord GetPropertyRecord()
     {
         return null;
     }
 
+    public override void SetByPropertyRecord(PropertyRecord record)
+    {
+        
+    }
 }

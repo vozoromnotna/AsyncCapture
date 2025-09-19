@@ -5,6 +5,11 @@ namespace AsyncCapture.Utc12.Properties
     public class UTC12LGainProp : IntProperty
     {
         public override int MinIncrement => 1;
+        
+        private int _minValue;
+        private int _maxValue;
+        public override int MinValue { get => _minValue; }
+        public override int MaxValue { get => _maxValue; }
 
         public override string Name => "Gain";
 
@@ -53,6 +58,11 @@ namespace AsyncCapture.Utc12.Properties
     public class UTC12LBrightnessProp : IntProperty
     {
         public override int MinIncrement => 1;
+        
+        private int _minValue;
+        private int _maxValue;
+        public override int MinValue { get => _minValue; }
+        public override int MaxValue { get => _maxValue; }
 
         public override string Name => "Brightness";
 
