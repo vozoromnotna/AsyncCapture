@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <UseWPF>true</UseWPF>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Page Update="Hist\HistWindow.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="DirectShowLib" Version="1.0.0" />
+      <PackageReference Include="Extended.Wpf.Toolkit" Version="5.0.0" />
+      <PackageReference Include="ic4dotnet" Version="1.4.0.3227-test" />
+      <PackageReference Include="ScottPlot.WPF" Version="4.1.74" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\AsyncCapture.Core\AsyncCapture.Core.csproj" />
+      <ProjectReference Include="..\AsyncCapture.Iray\AsyncCapture.Iray.csproj" />
+      <ProjectReference Include="..\AsyncCapture.Utc12\AsyncCapture.Utc12.csproj" />
+    </ItemGroup>
+
+</Project>

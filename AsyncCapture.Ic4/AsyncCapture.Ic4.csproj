@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\AsyncCapture.Core\AsyncCapture.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="ic4dotnet" Version="1.4.0.3227-test" />
+      <PackageReference Include="ic4dotnet.OpenCvSharp" Version="1.4.0.3227-test" />
+    </ItemGroup>
+
+</Project>

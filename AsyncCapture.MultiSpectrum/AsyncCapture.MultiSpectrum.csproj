@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="HDF5-CSharp" Version="1.19.0" />
+      <PackageReference Include="OpenCvSharp4" Version="4.11.0.20250507" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\AsyncCapture.Core\AsyncCapture.Core.csproj" />
+    </ItemGroup>
+
+</Project>
