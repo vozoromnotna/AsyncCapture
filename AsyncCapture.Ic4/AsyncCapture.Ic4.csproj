@@ -12,8 +12,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="ic4dotnet" Version="1.4.0.3227-test" />
-      <PackageReference Include="ic4dotnet.OpenCvSharp" Version="1.4.0.3227-test" />
+      <PackageReference Include="ic4dotnet" Version="1.4.0.3240" />
+      <PackageReference Include="ic4dotnet.OpenCvSharp" Version="1.4.0.3240" />
     </ItemGroup>
 
 </Project>

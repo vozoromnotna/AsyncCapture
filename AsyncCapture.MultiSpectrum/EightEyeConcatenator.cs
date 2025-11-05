@@ -85,7 +85,7 @@ public class EightEyeConcatenator : MatSource
 
     private async Task process()
     {
-        var output = concat(_imageBuffer);
+        var output = Concat(_imageBuffer, IsBorders, BordersThickness, BordersColor);
 
         await imageGetted(output, _meta);
 
@@ -100,8 +100,31 @@ public class EightEyeConcatenator : MatSource
         await _tcs.Task;
     }
 
-    private Mat concat(Mat[] mats)
+    public bool IsBorders { get; set; } = false;
+    public Scalar BordersColor { get; set; } = Scalar.Black;
+    public int BordersThickness { get; set; } = 2;
+    public Mat Concat(Mat[] mats, bool isBorders, int bordersThikness = 1, Scalar bordersColor = default(Scalar))
     {
+        if (isBorders)
+        {
+            var borderedMats = new Mat[mats.Length];
+            for (int i = 0; i < mats.Length; i++)
+            {
+                borderedMats[i] = new Mat();
+                Cv2.CopyMakeBorder(
+                    mats[i],
+                    borderedMats[i],
+                    bordersThikness,
+                    bordersThikness,
+                    bordersThikness,
+                    bordersThikness,
+                    BorderTypes.Constant,
+                    bordersColor
+                );
+            }
+            mats = borderedMats;
+        }
+
         var output = new Mat();
         var upper = new Mat();
         var lower = new Mat();
@@ -111,11 +134,13 @@ public class EightEyeConcatenator : MatSource
         {
             var index = _imageMap[i];
             reorderedMat[i] = mats[index];
+
         }
 
-        Cv2.HConcat(reorderedMat.Take(MaxImages / 2), upper);
-        Cv2.HConcat(reorderedMat.Skip(MaxImages / 2), lower);
+        Cv2.HConcat(reorderedMat.Take(MaxImages / 2).ToArray(), upper);
+        Cv2.HConcat(reorderedMat.Skip(MaxImages / 2).ToArray(), lower);
         Cv2.VConcat(new List<Mat> { upper, lower }, output);
+
         return output;
     }
 

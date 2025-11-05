@@ -158,6 +158,7 @@ public sealed class Ic4CS : CameraSource
 
     private async void Sink_FramesQueued1(object? sender, QueueSinkEventArgs e)
     {
+        var time = DateTime.Now;
         var sink = _grabber.Sink as QueueSink;
         if (sink == null)
             return;
@@ -166,11 +167,23 @@ public sealed class Ic4CS : CameraSource
         if (res)
         {
             var meta = new Dictionary<string, object>();
+            meta["time"] = time;
+            FillMeta(meta);
+            
             await imageGetted(buffer.CreateOpenCvWrap(), meta);
         }
-
+        buffer.Dispose();
 
         //_trigger.Execute();
+    }
+
+    private void FillMeta(Dictionary<string, object> meta)
+    {
+        var exposure = _grabber.DevicePropertyMap.Find(PropId.ExposureTime).Value;
+        var gain = _grabber.DevicePropertyMap.Find(PropId.Gain).Value;
+
+        meta["exposure"] = exposure;
+        meta["gain"] = gain;
     }
 
     void restartSink()

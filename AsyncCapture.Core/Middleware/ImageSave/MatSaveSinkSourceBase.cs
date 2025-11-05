@@ -105,7 +105,7 @@ public abstract class MatSaverSinkSourceBase : MatSource, ISinkSource<Mat>, ISav
             return;
         }
 
-        await SaveImage(image, meta);
+        SaveImage(image, meta);
 
         if (_counter >= MaxCount)
         {
