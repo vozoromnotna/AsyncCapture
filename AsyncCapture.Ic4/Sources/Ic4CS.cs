@@ -25,7 +25,7 @@ public sealed class Ic4CS : CameraSource
 
 
         var fps = _grabber.DevicePropertyMap.Find(PropId.AcquisitionFrameRate);
-        fps.TrySetValue(30);
+        fps.TrySetValue(fps.Maximum);
 
         var maxWidthProp = _grabber.DevicePropertyMap.Find(PropId.WidthMax);
 
