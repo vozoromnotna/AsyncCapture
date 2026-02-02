@@ -5,6 +5,7 @@ namespace AsyncCapture.Core.Cameras.CameraProperties;
 
 public abstract class ButtonProperty : PropertyBase
 {
+    public event Action ButtonClicked;
     private RelayCommand buttonCommand;
     public RelayCommand ButtonCommand
     {
@@ -13,6 +14,7 @@ public abstract class ButtonProperty : PropertyBase
             return buttonCommand ?? (buttonCommand = new RelayCommand(() =>
             {
                 OnButtonClicked();
+                ButtonClicked?.Invoke();
             }));
         }
     }

@@ -22,7 +22,7 @@ public sealed class Ic4CS : CameraSource
 
         _grabber = new Grabber();
         _grabber.DeviceOpen(deviceList[0]);
-
+    
 
         var fps = _grabber.DevicePropertyMap.Find(PropId.AcquisitionFrameRate);
         fps.TrySetValue(30);
@@ -44,13 +44,23 @@ public sealed class Ic4CS : CameraSource
         initExposureProp();
         initTrigger();
         initGainProp();
+        initStatusProp();
         //initImageSizeProp();
+    }
+
+    private void initStatusProp()
+    {
+        var statusProp = new Ic4StatusProp(_grabber);
+        statusProp.IsHidden = true;
+        Properties.Add(statusProp);
     }
 
     void initTrigger()
     {
         _grabber.DevicePropertyMap.TryFind(PropId.TriggerSource, out var triggerS);
          _grabber.DevicePropertyMap.TryFind(PropId.TriggerMode, out var triggerM);
+
+         
 
          if (triggerS != null)
          {
