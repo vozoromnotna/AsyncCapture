@@ -31,6 +31,17 @@ public abstract partial class PropertyBase : ObservableObject
         } 
     }
 
+    protected bool _isHidden = false;
+    public bool IsHidden
+    {
+        get => _isHidden;
+        set
+        {
+            _isHidden = value;
+            OnPropertyChanged();
+        }
+    }
+
     public virtual void Update() { }
 
     public override string ToString()

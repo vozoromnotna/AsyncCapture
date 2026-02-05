@@ -1,5 +1,6 @@
 ﻿using AsyncCapture.Core;
 using OpenCvSharp;
+using System;
 
 namespace AsyncCapture.MultiSpectrum;
 
@@ -22,11 +23,10 @@ public class EightEyeProcessor : ISink<Mat>
 
     private int[] _wavelengths;
     private OpenCvSharp.Rect[] _rects;
+    private readonly object _calibLock = new();
     public EightEyeProcessor(CalibData calibData)
     {
         _calibData = calibData;
-
-
         PreReadCalib();
         _wavelengths = GetOrderedWavelengths();
     }
@@ -43,6 +43,19 @@ public class EightEyeProcessor : ISink<Mat>
 
     private CalibData? _calibData;
 
+    public void SetCalibData(CalibData calibData)
+    {
+        if (calibData == null)
+            throw new ArgumentNullException(nameof(calibData));
+
+        lock (_calibLock)
+        {
+            _calibData = calibData;
+            PreReadCalib();
+            _wavelengths = GetOrderedWavelengths();
+        }
+    }
+
     public ISink<Mat> GetSink(int index)
     {
         return sinks[index];
@@ -57,15 +70,22 @@ public class EightEyeProcessor : ISink<Mat>
 
     private Mat[] proccess(Mat input)
     {
-        if (_calibData == null)
-            throw new Exception("No calib data loaded");
+        CalibData calibData;
+        OpenCvSharp.Rect[] rects;
+        lock (_calibLock)
+        {
+            if (_calibData == null)
+                throw new Exception("No calib data loaded");
+            calibData = _calibData;
+            rects = _rects;
+        }
 
-        var vinList = _calibData.Vin;
-        var distList = _calibData.Dist;
-        var mtxList = _calibData.Mtx;
-        var pos = _calibData.Pos;
+        var vinList = calibData.Vin;
+        var distList = calibData.Dist;
+        var mtxList = calibData.Mtx;
+        var pos = calibData.Pos;
         var inputSize = input.Size();
-        var affineList = _calibData.Affine;
+        var affineList = calibData.Affine;
         var outArray = new Mat[8]; 
 
         //for (int i = 0; i < vinList.Count; i++)
@@ -79,7 +99,7 @@ public class EightEyeProcessor : ISink<Mat>
                 var mtxMat = mtxList[i];
 
 
-                var rect = _rects[i];
+                var rect = rects[i];
 
 
                 outArray[i] = new Mat(input, rect);
@@ -87,7 +107,7 @@ public class EightEyeProcessor : ISink<Mat>
                 
                 var output = outArray[i];
 
-                Cv2.Resize(output, output, _rects[0].Size, interpolation: InterpolationFlags.Cubic);
+                Cv2.Resize(output, output, rects[0].Size, interpolation: InterpolationFlags.Cubic);
 
                 if (_vignetting)
                 {
