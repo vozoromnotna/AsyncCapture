@@ -11,8 +11,12 @@ public sealed class Ic4CS : CameraSource
     Grabber _grabber;
     public Ic4CS()
     {
+        #if DEBUG
         Library.Init(LogLevel.Trace);
-
+        #else
+        Library.Init();
+        #endif
+        
         var deviceList = DeviceEnum.Devices;
 
         if (deviceList.Count == 0)
