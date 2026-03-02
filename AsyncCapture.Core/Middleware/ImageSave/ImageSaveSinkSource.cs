@@ -138,9 +138,14 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
     {
         System.IO.Directory.CreateDirectory(_directoryPath);
         _recordDirectoryPath = _directoryPath;
-        lock (_bufferLock)
+        _bufferSemaphore.Wait();
+        try
         {
-            AsyncContext.Run(()=>SaveImage(_bufferMat, _bufferMeta));
+            AsyncContext.Run(() => SaveImage(_bufferMat, _bufferMeta));
+        }
+        finally
+        {
+            _bufferSemaphore.Release();
         }
 
     }
