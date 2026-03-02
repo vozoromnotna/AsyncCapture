@@ -113,7 +113,7 @@ public abstract class Property<T> : PropertyBase
     }
 }
 
-interface IIncremented<T>
+public interface IIncremented<T>
 {
     T Increment { get; set; }
     T MinIncrement { get; }
@@ -121,7 +121,7 @@ interface IIncremented<T>
 
 public abstract class DoubleProperty : Property<double>, IIncremented<double>
 {
-    protected double _increment;
+    protected double _increment = 1;
     public double Increment
     {
         get => _increment;
@@ -152,7 +152,7 @@ public abstract class BoolProperty : Property<bool>
 
 public abstract class UintProperty : Property<uint>, IIncremented<uint>
 {
-    protected uint _increment;
+    protected uint _increment = 1;
     public uint Increment 
     { 
         get => _increment;
@@ -177,7 +177,7 @@ public abstract class UintProperty : Property<uint>, IIncremented<uint>
 
 public abstract class IntProperty : Property<int>, IIncremented<int>
 {
-    protected int _increment;
+    protected int _increment = 1;
     public int Increment
     {
         get => _increment;
