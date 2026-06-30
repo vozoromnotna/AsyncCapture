@@ -28,6 +28,7 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
     protected Dictionary<string, object> _bufferMeta;
     protected object _bufferLock = new object();
     protected SemaphoreSlim _bufferSemaphore = new SemaphoreSlim(1, 1);
+    private TaskCompletionSource<(Mat Image, Dictionary<string, object> Meta)>? _singleFrameWaiter;
     public override async Task PutImage(Mat image, Dictionary<string, object> meta)
     {
         await _bufferSemaphore.WaitAsync();
@@ -45,6 +46,8 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
             _bufferSemaphore.Release();
         }
 
+        CompleteSingleFrameWaiter(image, meta);
+
         if (IsSave && IsSaveMeta)
         {
             SaveMeta(meta);
@@ -57,6 +60,8 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
 
     private void SaveMeta(Dictionary<string, object> meta)
     {
+        meta ??= new Dictionary<string, object>();
+
         var metaFilenamePath = Path.Combine(_recordDirectoryPath, "meta.csv");
         bool fileExists = File.Exists(metaFilenamePath);
 
@@ -119,15 +124,21 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
 
     protected override async Task SaveImage(Mat image, Dictionary<string, object> meta)
     {
+        if (image == null || image.Empty())
+            throw new InvalidOperationException("Кадр для сохранения еще не получен.");
+
+        meta ??= new Dictionary<string, object>();
+
         string path = _recordDirectoryPath;
 
         if (String.IsNullOrEmpty(path))
             path = _directoryPath;
 
-        var getTimeRes = meta.TryGetValue("time", out object timeRes);
-        
-        var time = "";
-        time = getTimeRes ? Helper.GetStringTime((DateTime)timeRes) : Helper.GetStringTime();
+        var time = Helper.GetStringTime();
+        if (meta.TryGetValue("time", out object timeRes) && timeRes is DateTime frameTime)
+        {
+            time = Helper.GetStringTime(frameTime);
+        }
 
         var filename = await new ImageSaver(image.Clone(), camName: _name, path: path, saveFormat: SaveFormat, time: time).SaveAsync();
         LastFilename = filename;
@@ -136,18 +147,73 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
 
     public virtual void Single()
     {
+        AsyncContext.Run(() => SingleAsync());
+    }
+
+    public virtual async Task SingleAsync(CancellationToken cancellationToken = default, Action? frameReceived = null)
+    {
         System.IO.Directory.CreateDirectory(_directoryPath);
         _recordDirectoryPath = _directoryPath;
-        _bufferSemaphore.Wait();
+
+        var waiter = CreateSingleFrameWaiter();
+        Mat? image = null;
         try
         {
-            AsyncContext.Run(() => SaveImage(_bufferMat, _bufferMeta));
+            (image, var meta) = await waiter.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
+            frameReceived?.Invoke();
+            await SaveImage(image, meta).ConfigureAwait(false);
         }
         finally
         {
-            _bufferSemaphore.Release();
+            ClearSingleFrameWaiter(waiter);
+            image?.Dispose();
         }
 
+    }
+
+    private TaskCompletionSource<(Mat Image, Dictionary<string, object> Meta)> CreateSingleFrameWaiter()
+    {
+        lock (_bufferLock)
+        {
+            if (_singleFrameWaiter != null && !_singleFrameWaiter.Task.IsCompleted)
+                throw new InvalidOperationException("Сохранение кадра уже ожидает изображение.");
+
+            _singleFrameWaiter = new TaskCompletionSource<(Mat Image, Dictionary<string, object> Meta)>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+            return _singleFrameWaiter;
+        }
+    }
+
+    private void CompleteSingleFrameWaiter(Mat image, Dictionary<string, object> meta)
+    {
+        TaskCompletionSource<(Mat Image, Dictionary<string, object> Meta)>? waiter;
+        lock (_bufferLock)
+        {
+            waiter = _singleFrameWaiter;
+            if (waiter == null || waiter.Task.IsCompleted)
+                return;
+        }
+
+        var imageToSave = image.Clone();
+        var metaToSave = meta == null
+            ? new Dictionary<string, object>()
+            : new Dictionary<string, object>(meta);
+
+        if (!waiter.TrySetResult((imageToSave, metaToSave)))
+        {
+            imageToSave.Dispose();
+        }
+    }
+
+    private void ClearSingleFrameWaiter(TaskCompletionSource<(Mat Image, Dictionary<string, object> Meta)> waiter)
+    {
+        lock (_bufferLock)
+        {
+            if (ReferenceEquals(_singleFrameWaiter, waiter))
+            {
+                _singleFrameWaiter = null;
+            }
+        }
     }
 
     protected override string GetRecordDirectoryPath()
