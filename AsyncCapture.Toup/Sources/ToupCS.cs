@@ -140,6 +140,7 @@ public sealed class ToupCS : CameraSource
             _nncam.get_ExpoTime(out var expoTime);
             _nncam.get_ExpoAGain(out var gain);
             var mat = new Mat(new OpenCvSharp.Size(_width, _height), MatType.CV_16UC1);
+            var time = DateTime.Now;
             try
             {
                 var bOK = _nncam.PullImageV3(mat.Data, 0, 16 , (int)mat.Step(), out var info);
@@ -148,6 +149,7 @@ public sealed class ToupCS : CameraSource
             {
                 var meta = new Dictionary<string, object>
                 {
+                    { "time", time },
                     { "exposition", (int)expoTime },
                     { "gain", (int)gain }
                 };
@@ -169,6 +171,7 @@ public sealed class ToupCS : CameraSource
             _nncam.get_ExpoTime(out var expoTime);
             _nncam.get_ExpoAGain(out var gain);
             var mat = new Mat(new OpenCvSharp.Size(_width, _height), MatType.CV_8UC3);
+            var time = DateTime.Now;
             try
             {
                 var bOK = _nncam.PullImageV3(mat.Data, 0, 24, (int)mat.Step(), out var info);
@@ -177,6 +180,7 @@ public sealed class ToupCS : CameraSource
             {
                 var meta = new Dictionary<string, object>
                 {
+                    { "time", time },
                     { "exposition", (int)expoTime },
                     { "gain", (int)gain }
                 };
