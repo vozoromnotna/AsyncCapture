@@ -11,8 +11,12 @@ public sealed class Ic4CS : CameraSource
     Grabber _grabber;
     public Ic4CS()
     {
+        #if DEBUG
         Library.Init(LogLevel.Trace);
-
+        #else
+        Library.Init();
+        #endif
+        
         var deviceList = DeviceEnum.Devices;
 
         if (deviceList.Count == 0)
@@ -28,16 +32,43 @@ public sealed class Ic4CS : CameraSource
         fps.TrySetValue(fps.Maximum);
 
         var maxWidthProp = _grabber.DevicePropertyMap.Find(PropId.WidthMax);
-
+        var maxHeightProp = _grabber.DevicePropertyMap.Find(PropId.HeightMax);
+        
         ImageMaxWidth = (int)maxWidthProp.Value;
+        ImageMaxHeight = (int)maxHeightProp.Value;
+        
         initProperties();
 
         //_trigger.Execute();
     }
 
+    public bool TrySetImageSize(int width, int height)
+    {
+        var heightProp = _grabber.DevicePropertyMap.Find(PropId.Height);
+        var widthProp = _grabber.DevicePropertyMap.Find(PropId.Width);
+
+        if (!heightProp.TrySetValue(height))
+            return false;
+
+        if (!widthProp.TrySetValue(width))
+            return false;
+        
+        return true;
+    }
+    public void SetMaxImageSize()
+    {
+        var heightProp = _grabber.DevicePropertyMap.Find(PropId.Height);
+        var widthProp = _grabber.DevicePropertyMap.Find(PropId.Width);
+        
+        heightProp.Value = ImageMaxHeight;
+        widthProp.Value = ImageMaxWidth;
+    }
+
     public Grabber Grabber { get => _grabber; }
 
     public int ImageMaxWidth { get; private set; }
+    
+    public int ImageMaxHeight { get; private set; }
 
     void initProperties()
     {
