@@ -9,7 +9,7 @@
 
     <ItemGroup>
       <PackageReference Include="HDF5-CSharp" Version="1.19.0" />
-      <PackageReference Include="OpenCvSharp4" Version="4.11.0.20250507" />
+      <PackageReference Include="OpenCvSharp4" Version="4.13.0.20260627" />
     </ItemGroup>
 
     <ItemGroup>
