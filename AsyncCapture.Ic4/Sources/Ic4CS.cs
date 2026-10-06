@@ -1,6 +1,7 @@
 ﻿using AsyncCapture.Core.Cameras;
 using AsyncCapture.Ic4.Properties;
 using ic4;
+using System.Diagnostics;
 
 namespace AsyncCapture.Ic4.Sources;
 
@@ -199,6 +200,7 @@ public sealed class Ic4CS : CameraSource
 
     private async void Sink_FramesQueued1(object? sender, QueueSinkEventArgs e)
     {
+        var acquisitionTimestamp = Stopwatch.GetTimestamp();
         var time = DateTime.Now;
         var sink = _grabber.Sink as QueueSink;
         if (sink == null)
@@ -209,6 +211,9 @@ public sealed class Ic4CS : CameraSource
         {
             var meta = new Dictionary<string, object>();
             meta["time"] = time;
+            meta["acquisitionTimestamp"] = acquisitionTimestamp;
+            meta["acquisitionTimestampFrequency"] = Stopwatch.Frequency;
+            meta["timestampProvenance"] = "AcquisitionBoundary";
             FillMeta(meta);
             
             await imageGetted(buffer.CreateOpenCvWrap(), meta);

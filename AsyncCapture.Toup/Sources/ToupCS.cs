@@ -1,6 +1,7 @@
 ﻿using AsyncCapture.Core.Cameras;
 using AsyncCapture.Toup.Properties;
 using OpenCvSharp;
+using System.Diagnostics;
 using static AsyncCapture.Toup.Sources.Tcam;
 
 namespace AsyncCapture.Toup.Sources;
@@ -8,13 +9,6 @@ namespace AsyncCapture.Toup.Sources;
 
 public sealed class ToupCS : CameraSource
 {
-
-    public ToupCS(Tcam nncam)
-    {
-        _nncam = nncam;
-        startDeviceRaw(nncam);
-    }
-
 
     private Tcam _nncam;
 
@@ -31,8 +25,25 @@ public sealed class ToupCS : CameraSource
 
     private int _width;
     private int _height;
+    private readonly string _cameraModel;
+    private readonly string _cameraSerialNumber;
+    private readonly string _configuration;
+    private int _reportedRawBitDepth;
 
     private bool _isRaw = false;
+    public ToupCS(
+        Tcam nncam,
+        string cameraModel = "",
+        string cameraSerialNumber = "",
+        string configuration = "touptek-1280swir-raw-gray16")
+    {
+        _nncam = nncam ?? throw new ArgumentNullException(nameof(nncam));
+        _cameraModel = cameraModel;
+        _cameraSerialNumber = cameraSerialNumber;
+        _configuration = configuration;
+        startDeviceRaw(nncam);
+    }
+
     private void startDevice(Tcam nncam)
     {
         if (nncam != null)
@@ -55,7 +66,7 @@ public sealed class ToupCS : CameraSource
             nncam.put_VFlip(false);
             nncam.put_HFlip(true);
 
-            nncam.get_RawFormat(out uint nFourCC, out uint bitdepth);
+            nncam.get_RawFormat(out _, out _);
         }
     }
 
@@ -71,6 +82,9 @@ public sealed class ToupCS : CameraSource
             nncam.put_VFlip(true);
             nncam.put_HFlip(true);
 
+            if (nncam.get_RawFormat(out _, out var bitdepth))
+                _reportedRawBitDepth = checked((int)bitdepth);
+
             uint resnum = _nncam.ResolutionNumber;
             uint eSize = 0;
             if (_nncam.get_eSize(out eSize))
@@ -84,7 +98,6 @@ public sealed class ToupCS : CameraSource
             }
             
 
-            nncam.get_RawFormat(out uint nFourCC, out uint bitdepth);
         }
     }
 
@@ -137,6 +150,7 @@ public sealed class ToupCS : CameraSource
     {
         try
         {
+            var acquisitionTimestamp = Stopwatch.GetTimestamp();
             _nncam.get_ExpoTime(out var expoTime);
             _nncam.get_ExpoAGain(out var gain);
             var mat = new Mat(new OpenCvSharp.Size(_width, _height), MatType.CV_16UC1);
@@ -150,8 +164,15 @@ public sealed class ToupCS : CameraSource
                 var meta = new Dictionary<string, object>
                 {
                     { "time", time },
+                    { "acquisitionTimestamp", acquisitionTimestamp },
+                    { "acquisitionTimestampFrequency", Stopwatch.Frequency },
+                    { "timestampProvenance", "AcquisitionBoundary" },
                     { "exposition", (int)expoTime },
-                    { "gain", (int)gain }
+                    { "gain", (int)gain },
+                    { "significantBitDepth", _reportedRawBitDepth },
+                    { "cameraModel", _cameraModel },
+                    { "cameraSerialNumber", _cameraSerialNumber },
+                    { "configuration", _configuration }
                 };
 
                 if (_isLive)

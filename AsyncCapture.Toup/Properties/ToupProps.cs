@@ -86,6 +86,44 @@ public sealed class ToupExp : DoubleProperty
 
 }
 
+public sealed class ToupGain : DoubleProperty
+{
+    private readonly Tcam _camera;
+    private readonly double _minimum;
+    private readonly double _maximum;
+
+    public override string Name => "Gain";
+    public override string DisplayName => "Усиление, %";
+    public override double MinValue => _minimum;
+    public override double MaxValue => _maximum;
+    public override double MinIncrement => 1;
+    public override string FormatString => "0";
+
+    public ToupGain(Tcam camera)
+    {
+        _camera = camera ?? throw new ArgumentNullException(nameof(camera));
+        _camera.get_ExpoAGainRange(out var minimum, out var maximum, out _);
+        _camera.get_ExpoAGain(out var value);
+        _minimum = minimum;
+        _maximum = maximum;
+        _value = value;
+    }
+
+    public override double GetValue()
+    {
+        _camera.get_ExpoAGain(out var value);
+        return value;
+    }
+
+    public override void SetValue(double value)
+    {
+        if (!double.IsFinite(value) || value < _minimum || value > _maximum || Math.Truncate(value) != value)
+            throw new ArgumentOutOfRangeException(nameof(value), "ToupTek gain must be an integral value within the camera's supported percent range.");
+        if (!_camera.put_ExpoAGain(checked((ushort)value)))
+            throw new InvalidOperationException("ToupTek camera rejected the requested gain.");
+    }
+}
+
 // public class ToupResolution : ListProperty
 // {
 //     private Tcam nncam;

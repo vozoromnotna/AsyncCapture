@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace AsyncCapture.Core.Cameras.CameraSources;
 
@@ -34,10 +35,14 @@ public class VideoCaptureCS : CameraSource
                     continue;
 
                 var frame = new Mat();
+                var acquisitionTimestamp = Stopwatch.GetTimestamp();
                 if (_videoCapture.Read(frame))
                 {
                     var meta = new Dictionary<string, object>();
                     meta["fps"] = _videoCapture.Fps;
+                    meta["acquisitionTimestamp"] = acquisitionTimestamp;
+                    meta["acquisitionTimestampFrequency"] = Stopwatch.Frequency;
+                    meta["timestampProvenance"] = "AcquisitionBoundary";
                     await imageGetted(frame, meta);
                     
                 }
