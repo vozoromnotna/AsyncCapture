@@ -86,12 +86,14 @@ public class EightEyeProcessor : ISink<Mat>
         var pos = calibData.Pos;
         var inputSize = input.Size();
         var affineList = calibData.Affine;
-        var outArray = new Mat[8]; 
+        var outArray = new Mat[8];
 
         //for (int i = 0; i < vinList.Count; i++)
         //{
-            Parallel.For(0, vinList.Count, (i) =>
+            try
             {
+                Parallel.For(0, vinList.Count, (i) =>
+                {
                 var vinMat = vinList[i];
 
                 var distMat = distList[i];
@@ -102,9 +104,9 @@ public class EightEyeProcessor : ISink<Mat>
                 var rect = rects[i];
 
 
-                outArray[i] = new Mat(input, rect);
-
-                
+                // Do not expose an ROI view into the camera/source-owned raw frame.
+                using var roi = new Mat(input, rect);
+                outArray[i] = roi.Clone();
                 var output = outArray[i];
 
                 Cv2.Resize(output, output, rects[0].Size, interpolation: InterpolationFlags.Cubic);
@@ -126,7 +128,13 @@ public class EightEyeProcessor : ISink<Mat>
                 //    Cv2.WarpAffine(output, output, affineMat.T(), output.Size());
                 //}
 
-            });
+                });
+            }
+            catch
+            {
+                foreach (var band in outArray) band?.Dispose();
+                throw;
+            }
 
         return outArray;
     }
@@ -140,7 +148,7 @@ public class EightEyeProcessor : ISink<Mat>
 
     private void RemoveDistortion(Mat input, Mat output, Mat distMat, Mat mtxMat)
     {
-        var outUdistort = new Mat();
+        using var outUdistort = new Mat();
         Cv2.Undistort(output, outUdistort, mtxMat, distMat);
         Cv2.CopyTo(outUdistort, output);
     }
@@ -152,15 +160,21 @@ public class EightEyeProcessor : ISink<Mat>
     public async Task PutImage(Mat image, Dictionary<string, object> meta)
     {
         var res = proccess(image);
-        
-        await Parallel.ForAsync(0, 8, async (i, token) =>
+        try
         {
-            var newMeta = new Dictionary<string, object>();
-            CopyDict(meta, newMeta);
-            newMeta["index"] = i;
-            newMeta["wavelength"] = _wavelengths[i];
-            await sinks[i].PutImage(res[i], newMeta);
-        });
+            await Parallel.ForAsync(0, 8, async (i, token) =>
+            {
+                var newMeta = new Dictionary<string, object>();
+                CopyDict(meta, newMeta);
+                newMeta["index"] = i;
+                newMeta["wavelength"] = _wavelengths[i];
+                await sinks[i].PutImage(res[i], newMeta).ConfigureAwait(false);
+            }).ConfigureAwait(false);
+        }
+        finally
+        {
+            foreach (var band in res) band?.Dispose();
+        }
     }
 
     private void CopyDict(Dictionary<string, object> oldDict, Dictionary<string, object> newDict)
