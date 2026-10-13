@@ -53,6 +53,11 @@ public abstract class MatSaverSinkSourceBase : MatSource, ISinkSource<Mat>, ISav
         get => _isSave;
         set
         {
+            if (value == _isSave)
+            {
+                return;
+            }
+
             if (value)
             {
                 _recordDirectoryPath = GetRecordDirectoryPath();

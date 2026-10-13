@@ -128,7 +128,11 @@ namespace AsyncCapture.Core.Middleware.ImageSave
                 Cv2.Normalize(mat, mat, 0, 255, NormTypes.MinMax);
             }
 
-            mat.SaveImage(save_path);
+            if (!mat.SaveImage(save_path))
+            {
+                throw new IOException($"Failed to save image to '{save_path}'.");
+            }
+
             return save_path;
         }
         public string Save()

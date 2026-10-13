@@ -54,8 +54,6 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
         }
         
         await base.PutImage(image, meta);
-        
-        base.RiseMatSaved(_name, _directoryPath, false);
     }
 
     private void SaveMeta(Dictionary<string, object> meta)
@@ -124,6 +122,11 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
 
     protected override async Task SaveImage(Mat image, Dictionary<string, object> meta)
     {
+        LastFilename = await SaveImageAndGetPath(image, meta).ConfigureAwait(false);
+    }
+
+    private async Task<string> SaveImageAndGetPath(Mat image, Dictionary<string, object> meta)
+    {
         if (image == null || image.Empty())
             throw new InvalidOperationException("Кадр для сохранения еще не получен.");
 
@@ -141,7 +144,7 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
         }
 
         var filename = await new ImageSaver(image.Clone(), camName: _name, path: path, saveFormat: SaveFormat, time: time).SaveAsync();
-        LastFilename = filename;
+        return filename;
     }
 
 
@@ -161,7 +164,19 @@ public class ImageSaveSinkSource : MatSaverSinkSourceBase
         {
             (image, var meta) = await waiter.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
             frameReceived?.Invoke();
-            await SaveImage(image, meta).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            var savedPath = await SaveImageAndGetPath(image, meta).ConfigureAwait(false);
+            LastFilename = savedPath;
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (string.IsNullOrWhiteSpace(savedPath))
+            {
+                throw new IOException("Изображение не вернуло путь сохраненного файла.");
+            }
+
+            var savedDirectory = Path.GetDirectoryName(savedPath) ?? _directoryPath;
+            var savedFilename = Path.GetFileName(savedPath);
+            base.RiseMatSaved(_name, savedDirectory, false, savedFilename);
         }
         finally
         {
